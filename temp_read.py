@@ -40,7 +40,7 @@ while True :
     val_1 = ADS1.readADC(1)
     val_2 = ADS1.readADC(2)
     val_3 = ADS1.readADC(3)
-    val_4 = ADS2.readADC(0)
+    val_4 = ADS2.readADC(1)
 
     v_0 = val_0 * f1
     v_1 = val_1 * f1
