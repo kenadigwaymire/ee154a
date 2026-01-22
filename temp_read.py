@@ -60,16 +60,16 @@ while True :
     t_3 = calc_temp(r_3)
     t_4 = calc_temp(r_4)
 
-    print("Analog0: {0:d}\t{1:.3f} V".format(val_0, val_0 * f1))
+    '''print("Analog0: {0:d}\t{1:.3f} V".format(val_0, val_0 * f1))
     print("Analog1: {0:d}\t{1:.3f} V".format(val_1, val_1 * f1))
     print("Analog2: {0:d}\t{1:.3f} V".format(val_2, val_2 * f1))
     print("Analog3: {0:d}\t{1:.3f} V".format(val_3, val_3 * f1))
-    print("Analog4: {0:d}\t{1:.3f} V".format(val_4, val_4 * f2))
+    print("Analog4: {0:d}\t{1:.3f} V".format(val_4, val_4 * f2))'''
     
-    '''print(f"Analog0: {t_0} C")
-    print(f"Analog1: {t_0} C")
-    print(f"Analog2: {t_0} C")
-    print(f"Analog3: {t_0} C")
-    print(f"Analog4: {t_0} C")'''
+    print(f"Analog0: {t_0} C")
+    print(f"Analog1: {t_1} C")
+    print(f"Analog2: {t_2} C")
+    print(f"Analog3: {t_3} C")
+    print(f"Analog4: {t_4} C")
 
     time.sleep(1)
