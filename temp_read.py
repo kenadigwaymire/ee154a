@@ -32,7 +32,7 @@ ADS2.setGain(ADS2.PGA_4_096V)
 f2 = ADS2.toVoltage()
 
 def calc_temp(res):
-    inv = A + (B * math.log(res)) + (C * (math.log)**2) + (D * (math.log)**3)
+    inv = A + (B * math.log(res)) + (C * (math.log(res))**2) + (D * (math.log(res))**3)
     return 1/inv
 
 while True :
