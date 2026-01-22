@@ -16,7 +16,7 @@ C = -2.47620754758454e-7
 D = 1.65394923419592e-7
 
 R_VAL = 6800
-MULT_CONST = 5
+VCC = 3.3
 
 ADS1 = ADS1x15.ADS1115(1, 0x49)
 ADS2 = ADS1x15.ADS1115(1, 0x48)
@@ -48,11 +48,11 @@ while True :
     v_3 = val_3 * f1
     v_4 = val_4 * f2
 
-    r_0 = ((R_VAL * MULT_CONST) / v_0) - R_VAL
-    r_1 = ((R_VAL * MULT_CONST) / v_1) - R_VAL
-    r_2 = ((R_VAL * MULT_CONST) / v_2) - R_VAL
-    r_3 = ((R_VAL * MULT_CONST) / v_3) - R_VAL
-    r_4 = ((R_VAL * MULT_CONST) / v_4) - R_VAL
+    r_0 = ((R_VAL * VCC) / v_0) - R_VAL
+    r_1 = ((R_VAL * VCC) / v_1) - R_VAL
+    r_2 = ((R_VAL * VCC) / v_2) - R_VAL
+    r_3 = ((R_VAL * VCC) / v_3) - R_VAL
+    r_4 = ((R_VAL * VCC) / v_4) - R_VAL
 
     t_0 = calc_temp(r_0)
     t_1 = calc_temp(r_1)
