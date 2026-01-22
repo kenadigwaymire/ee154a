@@ -33,7 +33,7 @@ f2 = ADS2.toVoltage()
 
 def calc_temp(res):
     inv = A + (B * math.log(res)) + (C * (math.log(res))**2) + (D * (math.log(res))**3)
-    return 1/inv
+    return 1/inv - 273.15
 
 while True :
     val_0 = ADS1.readADC(0)
