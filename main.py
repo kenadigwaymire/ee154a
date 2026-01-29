@@ -6,6 +6,7 @@ import time
 import math
 import csv
 import sys
+from datetime import datetime, timezone
 
 # MPU9250 sensor imports
 from mpu9250_jmdev.registers import *
@@ -41,8 +42,7 @@ class Main:
         # Define speed
         self.sample_rate_hz = 346
         self.last_sample_time = time.time()
-        self.init_time = time.time()
-
+        
     def getImuData(self):
         accel_data = self.imu.readAccelerometerMaster()
         gyro_data = self.imu.readGyroscopeMaster()
@@ -138,8 +138,8 @@ class Main:
                 X_MAG, Y_MAG, Z_MAG = mag_data
 
                 # Print data as we go
-                t = time.time() - self.init_time
-                print(f"time: {t:.2f}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
+                t = datetime.now(timezone.utc)
+                print(f"time: {t}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
                 
                 # Save data to CSV
                 data = [[t, 
