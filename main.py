@@ -37,6 +37,10 @@ class Main:
         self.R_VAL = 6800
         self.VCC = 3.3
 
+        # Define speed
+        self.sample_rate_hz = 10
+        self.last_sample_time = time.time()
+
     def getImuData(self):
         accel_data = self.imu.readAccelerometerMaster()
         gyro_data = self.imu.readGyroscopeMaster()
@@ -94,6 +98,14 @@ class Main:
             writer.writerows(headers)
 
             while True:
+
+                # Wait until it's time for the next sample
+                while time.time() - self.last_sample_time < (1 / self.sample_rate_hz):
+                    # Do nothing
+                    pass
+                # Reset the sample time
+                self.last_sample_time = time.time()
+
                 # Read data from sensors
                 T1, T2, T3, T4, T5 = self.getTempData()
 
