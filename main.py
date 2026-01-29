@@ -41,8 +41,7 @@ class Main:
         # Define speed
         self.sample_rate_hz = 346
         self.last_sample_time = time.time()
-        self.init_time = time.time()
-
+        
     def getImuData(self):
         accel_data = self.imu.readAccelerometerMaster()
         gyro_data = self.imu.readGyroscopeMaster()
@@ -117,6 +116,7 @@ class Main:
         if filename.strip() == "":
             filename = "lab2.csv"
 
+        self.init_time = time.time()
         with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')
             writer.writerows(headers)
