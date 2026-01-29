@@ -10,6 +10,8 @@ except FileNotFoundError:
 
 df.replace(0, np.nan, inplace=True)
 
+print(df)
+
 df['ABS TIME'] = pd.to_datetime(df['ABS TIME'])
 
 plt.figure(figsize=(10, 6))
