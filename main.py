@@ -5,6 +5,7 @@ import os
 import time
 import math
 import csv
+import sys
 
 # MPU9250 sensor imports
 from mpu9250_jmdev.registers import *
@@ -38,7 +39,7 @@ class Main:
         self.VCC = 3.3
 
         # Define speed
-        self.sample_rate_hz = 10
+        self.sample_rate_hz = 346
         self.last_sample_time = time.time()
 
     def getImuData(self):
@@ -111,12 +112,15 @@ class Main:
         'X GYRO', 'Y GYRO', 'Z GYRO', 
         'X MAG', 'Y MAG', 'Z MAG',]]
 
-        with open('lab2.csv', 'w', newline='') as csvfile:
+        filename = input("Enter filename to save data (default: lab2.csv): ")
+        if filename.strip() == "":
+            filename = "lab2.csv"
+
+        with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')
             writer.writerows(headers)
 
             while True:
-
                 # Wait until it's time for the next sample
                 while time.time() - self.last_sample_time < (1 / self.sample_rate_hz):
                     # Do nothing
@@ -146,9 +150,9 @@ class Main:
                 writer.writerows(data)
 
 main = Main()
-#main.recordData()
-imu_freq = main.IMUFrequency()
-print(f'IMU frequency: {imu_freq} Hz')
-temp_freq = main.TempFrequency()
-print(f'Temperature frequency: {temp_freq} Hz')
+main.recordData()
+# imu_freq = main.IMUFrequency()
+# print(f'IMU frequency: {imu_freq} Hz')
+# temp_freq = main.TempFrequency()
+# print(f'Temperature frequency: {temp_freq} Hz')
 
