@@ -103,7 +103,10 @@ class Main:
                 X_MAG, Y_MAG, Z_MAG = mag_data
 
                 # Save data to CSV
-                data = [[time.time(), 
+                t = time.time()
+                print("time:", t, 
+                      "T1:", T1, "T2:", T2, "T3:", T3, "T4:", T4, "T5:", T5)
+                data = [[t, 
                         T1, T2, T3, T4, T5, 
                         X_ACC, Y_ACC, Z_ACC, 
                         X_GYRO, Y_GYRO, Z_GYRO, 
