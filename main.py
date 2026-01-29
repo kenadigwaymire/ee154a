@@ -15,10 +15,10 @@ from mpu9250_jmdev.mpu_9250 import MPU9250
 # Temp sensor imports
 import ADS1x15
 
+# GPIO pin imports
 import RPi.GPIO as GPIO
 
 TEMP_THRESH = 30
-
 
 class Main:
     def __init__(self):
@@ -145,7 +145,6 @@ class Main:
                     GPIO.output(self.TEMP_GPIO_PIN, GPIO.HIGH)
                 else:
                     GPIO.output(self.TEMP_GPIO_PIN, GPIO.LOW)
-                
 
                 accel_data, gyro_data, mag_data = self.getImuData()
                 X_ACC, Y_ACC, Z_ACC = accel_data
