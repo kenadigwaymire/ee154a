@@ -94,6 +94,15 @@ class Main:
             cnt += 1
         return cnt
     
+    def TempFrequency(self):
+        start_time = time.time()
+        duration = 1
+        cnt = 0
+        while time.time() - start_time < duration:
+            _, _, _ = self.getTempData()
+            cnt += 1
+        return cnt
+    
     def recordData(self):
         headers = [
         ['ABS TIME', 
