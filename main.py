@@ -6,6 +6,7 @@ import time
 import math
 import csv
 import sys
+from datetime import datetime, timezone
 
 # MPU9250 sensor imports
 from mpu9250_jmdev.registers import *
@@ -116,7 +117,6 @@ class Main:
         if filename.strip() == "":
             filename = "lab2.csv"
 
-        self.init_time = time.time()
         with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')
             writer.writerows(headers)
@@ -138,7 +138,7 @@ class Main:
                 X_MAG, Y_MAG, Z_MAG = mag_data
 
                 # Print data as we go
-                t = time.time() - self.init_time
+                t = datetime.now(timezone.utc)
                 print(f"time: {t:.2f}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
                 
                 # Save data to CSV
