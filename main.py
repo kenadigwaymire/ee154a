@@ -142,8 +142,10 @@ class Main:
                 # Read data from sensors
                 T1, T2, T3, T4, T5 = self.getTempData()
                 if any(t >= TEMP_THRESH for t in (T1, T2, T3, T4, T5)):
+                    print(f'GPIO HIGH')
                     GPIO.output(self.TEMP_GPIO_PIN, GPIO.HIGH)
                 else:
+                    print(f'GPIO LOW')
                     GPIO.output(self.TEMP_GPIO_PIN, GPIO.LOW)
                 
 
