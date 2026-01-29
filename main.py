@@ -52,7 +52,7 @@ class Main:
         self.ADS1.setGain(self.ADS1.PGA_4_096V)
         f1 = self.ADS1.toVoltage()
 
-        self.ADS2.setGain(ADS2.PGA_4_096V)
+        self.ADS2.setGain(self.ADS2.PGA_4_096V)
         f2 = self.ADS2.toVoltage()
 
         val_0 = self.ADS1.readADC(0)
