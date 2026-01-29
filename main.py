@@ -146,6 +146,9 @@ class Main:
                 writer.writerows(data)
 
 main = Main()
-main.recordData()
-#main.IMUFrequency()
+#main.recordData()
+imu_freq = main.IMUFrequency()
+print(f'IMU frequency: {imu_freq} Hz')
+temp_freq = main.TempFrequency()
+print(f'Temperature frequency: {temp_freq} Hz')
 
