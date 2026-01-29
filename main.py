@@ -73,11 +73,11 @@ class Main:
         r_3 = ((self.R_VAL * self.VCC) / v_3) - self.R_VAL
         r_4 = ((self.R_VAL * self.VCC) / v_4) - self.R_VAL
 
-        t_0 = self.calc_temp(r_0)
-        t_1 = self.calc_temp(r_1)
-        t_2 = self.calc_temp(r_2)
-        t_3 = self.calc_temp(r_3)
-        t_4 = self.calc_temp(r_4)
+        t_0 = self.calcTemperature(r_0)
+        t_1 = self.calcTemperature(r_1)
+        t_2 = self.calcTemperature(r_2)
+        t_3 = self.calcTemperature(r_3)
+        t_4 = self.calcTemperature(r_4)
 
         return t_0, t_1, t_2, t_3, t_4
     
