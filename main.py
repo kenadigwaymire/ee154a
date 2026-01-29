@@ -5,6 +5,7 @@ import os
 import time
 import math
 import csv
+import sys
 
 # MPU9250 sensor imports
 from mpu9250_jmdev.registers import *
@@ -38,8 +39,9 @@ class Main:
         self.VCC = 3.3
 
         # Define speed
-        self.sample_rate_hz = 10
+        self.sample_rate_hz = 346
         self.last_sample_time = time.time()
+        self.init_time = time.time()
 
     def getImuData(self):
         accel_data = self.imu.readAccelerometerMaster()
@@ -106,17 +108,20 @@ class Main:
     def recordData(self):
         headers = [
         ['ABS TIME', 
-        'T1', 'T2', 'T3', 'T4', 'T5', 
+        'T-CPU', 'T-PCB-TOP', 'T-PCB-BOTTOM', 'T-WIRELESS-MODEM', 'T-POWER-MANAGER', 
         'X ACC', 'Y ACC', 'Z ACC', 
         'X GYRO', 'Y GYRO', 'Z GYRO', 
         'X MAG', 'Y MAG', 'Z MAG',]]
 
-        with open('lab2.csv', 'w', newline='') as csvfile:
+        filename = input("Enter filename to save data (default: lab2.csv): ")
+        if filename.strip() == "":
+            filename = "lab2.csv"
+
+        with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')
             writer.writerows(headers)
 
             while True:
-
                 # Wait until it's time for the next sample
                 while time.time() - self.last_sample_time < (1 / self.sample_rate_hz):
                     # Do nothing
@@ -133,8 +138,8 @@ class Main:
                 X_MAG, Y_MAG, Z_MAG = mag_data
 
                 # Print data as we go
-                t = time.time()
-                print(f"time: {t:.2f}, T1: {T1:.2f}, T2: {T2:.2f}, T3: {T3:.2f}, T4: {T4:.2f}, T5: {T5:.2f}")
+                t = time.time() - self.init_time
+                print(f"time: {t:.2f}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
                 
                 # Save data to CSV
                 data = [[t, 
@@ -146,9 +151,9 @@ class Main:
                 writer.writerows(data)
 
 main = Main()
-#main.recordData()
-imu_freq = main.IMUFrequency()
-print(f'IMU frequency: {imu_freq} Hz')
-temp_freq = main.TempFrequency()
-print(f'Temperature frequency: {temp_freq} Hz')
+main.recordData()
+# imu_freq = main.IMUFrequency()
+# print(f'IMU frequency: {imu_freq} Hz')
+# temp_freq = main.TempFrequency()
+# print(f'Temperature frequency: {temp_freq} Hz')
 
