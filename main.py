@@ -99,7 +99,7 @@ class Main:
         duration = 1
         cnt = 0
         while time.time() - start_time < duration:
-            _, _, _, _ = self.getTempData()
+            _, _, _, _, _ = self.getTempData()
             cnt += 1
         return cnt
     
