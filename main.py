@@ -139,7 +139,7 @@ class Main:
 
                 # Print data as we go
                 t = datetime.now(timezone.utc)
-                print(f"time: {t:.2f}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
+                print(f"time: {t}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
                 
                 # Save data to CSV
                 data = [[t, 
