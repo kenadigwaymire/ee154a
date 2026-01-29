@@ -85,6 +85,15 @@ class Main:
 
         return t_0, t_1, t_2, t_3, t_4
     
+    def IMUFrequency(self):
+        start_time = time.time()
+        duration = 1
+        cnt = 0
+        while time.time() - start_time < duration:
+            _, _, _ = self.getImuData()
+            cnt += 1
+        return cnt
+    
     def recordData(self):
         headers = [
         ['ABS TIME', 
@@ -129,4 +138,5 @@ class Main:
 
 main = Main()
 main.recordData()
+#main.IMUFrequency()
 
