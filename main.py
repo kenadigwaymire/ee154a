@@ -123,11 +123,11 @@ class Main:
         'X GYRO', 'Y GYRO', 'Z GYRO', 
         'X MAG', 'Y MAG', 'Z MAG',]]
 
-        filename = input("Enter filename to save data (default: lab2.csv): ")
+        filename = input("Enter filename (DONT INCLUDE .csv) to save data (default: lab2): ").removesuffix('.csv')
         if filename.strip() == "":
             filename = "lab2.csv"
 
-        with open(filename, 'w', newline='') as csvfile:
+        with open(f"{filename}.csv", 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')
             writer.writerows(headers)
 
