@@ -15,6 +15,11 @@ from mpu9250_jmdev.mpu_9250 import MPU9250
 # Temp sensor imports
 import ADS1x15
 
+import RPi.GPIO as GPIO
+
+TEMP_THRESH = 30
+
+
 class Main:
     def __init__(self):
         # Setup IMU
@@ -42,6 +47,11 @@ class Main:
         # Define speed
         self.sample_rate_hz = 346
         self.last_sample_time = time.time()
+
+        self.TEMP_GPIO_PIN = 15
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.TEMP_GPIO_PIN, GPIO.OUT)
+        GPIO.output(self.TEMP_GPIO_PIN, GPIO.LOW)
         
     def getImuData(self):
         accel_data = self.imu.readAccelerometerMaster()
@@ -131,6 +141,11 @@ class Main:
 
                 # Read data from sensors
                 T1, T2, T3, T4, T5 = self.getTempData()
+                if any(t >= TEMP_THRESH for t in (T1, T2, T3, T4, T5)):
+                    GPIO.output(self.TEMP_GPIO_PIN, GPIO.HIGH)
+                else:
+                    GPIO.output(self.TEMP_GPIO_PIN, GPIO.LOW)
+                
 
                 accel_data, gyro_data, mag_data = self.getImuData()
                 X_ACC, Y_ACC, Z_ACC = accel_data
