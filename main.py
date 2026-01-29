@@ -108,7 +108,7 @@ class Main:
     def recordData(self):
         headers = [
         ['ABS TIME', 
-        'T0', 'T1', 'T2', 'T3', 'T4', 
+        'T-CPU', 'T-PCB-TOP', 'T-PCB-BOTTOM', 'T-WIRELESS-MODEM', 'T-POWER-MANAGER', 
         'X ACC', 'Y ACC', 'Z ACC', 
         'X GYRO', 'Y GYRO', 'Z GYRO', 
         'X MAG', 'Y MAG', 'Z MAG',]]
@@ -139,7 +139,7 @@ class Main:
 
                 # Print data as we go
                 t = time.time() - self.init_time
-                print(f"time: {t:.2f}, T0: {T1:.2f}, T1: {T2:.2f}, T2: {T3:.2f}, T3: {T4:.2f}, T4: {T5:.2f}")
+                print(f"time: {t:.2f}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
                 
                 # Save data to CSV
                 data = [[t, 
