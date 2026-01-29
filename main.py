@@ -41,6 +41,7 @@ class Main:
         # Define speed
         self.sample_rate_hz = 346
         self.last_sample_time = time.time()
+        self.init_time = time.time()
 
     def getImuData(self):
         accel_data = self.imu.readAccelerometerMaster()
@@ -107,7 +108,7 @@ class Main:
     def recordData(self):
         headers = [
         ['ABS TIME', 
-        'T1', 'T2', 'T3', 'T4', 'T5', 
+        'T0', 'T1', 'T2', 'T3', 'T4', 
         'X ACC', 'Y ACC', 'Z ACC', 
         'X GYRO', 'Y GYRO', 'Z GYRO', 
         'X MAG', 'Y MAG', 'Z MAG',]]
@@ -137,8 +138,8 @@ class Main:
                 X_MAG, Y_MAG, Z_MAG = mag_data
 
                 # Print data as we go
-                t = time.time()
-                print(f"time: {t:.2f}, T1: {T1:.2f}, T2: {T2:.2f}, T3: {T3:.2f}, T4: {T4:.2f}, T5: {T5:.2f}")
+                t = time.time() - self.init_time
+                print(f"time: {t:.2f}, T0: {T1:.2f}, T1: {T2:.2f}, T2: {T3:.2f}, T3: {T4:.2f}, T4: {T5:.2f}")
                 
                 # Save data to CSV
                 data = [[t, 
