@@ -156,7 +156,7 @@ class Main:
                 # Print data as we go
                 utc = datetime.now(timezone.utc)
                 t = time.time() - start_time
-                print(f"time: {utc}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
+                print(f"time: {t}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
                 
                 # Save data to CSV
                 data = [[utc, t,
