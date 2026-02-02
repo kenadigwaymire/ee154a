@@ -117,7 +117,7 @@ class Main:
     
     def recordData(self):
         headers = [
-        ['ABS TIME', 
+        ['UTC TIME', 'TIME (s)' 
         'T-CPU', 'T-PCB-TOP', 'T-PCB-BOTTOM', 'T-WIRELESS-MODEM', 'T-POWER-MANAGER', 
         'X ACC', 'Y ACC', 'Z ACC', 
         'X GYRO', 'Y GYRO', 'Z GYRO', 
@@ -126,6 +126,8 @@ class Main:
         filename = input("Enter filename (DONT INCLUDE .csv) to save data (default: lab2): ").removesuffix('.csv')
         if filename.strip() == "":
             filename = "lab2.csv"
+        
+        start_time = time.time()
 
         with open(f"{filename}.csv", 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')
@@ -152,11 +154,12 @@ class Main:
                 X_MAG, Y_MAG, Z_MAG = mag_data
 
                 # Print data as we go
-                t = datetime.now(timezone.utc)
-                print(f"time: {t}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
+                utc = datetime.now(timezone.utc)
+                t = time.time() - start_time
+                print(f"time: {utc}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
                 
                 # Save data to CSV
-                data = [[t, 
+                data = [[utc, t,
                         T1, T2, T3, T4, T5, 
                         X_ACC, Y_ACC, Z_ACC, 
                         X_GYRO, Y_GYRO, Z_GYRO, 
