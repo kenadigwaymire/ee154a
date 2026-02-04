@@ -1,18 +1,3 @@
-'''
-Changes from last week we need to add
-- lighter data type such as CCSDS or binary
-- deterministic main loop at set frequency
-- Watchdog timer force reset if main loop fails
-- Memory scrubbing to avoid memory leaks
-- System health monitor
-- Sensor fault recognition and handling (too high or invalid values)
-- flush data frequently in small chunks to disk
-- if approaching storage limits, delete oldest data
-- convert to state machine with safe mode for minimal operation
-- add a test for i2c connectiions at launch and allow correction
-- be able to handle internal clock and ISS RTC and syncing
-- clear transmitions between data logging and boot and safe modes
-'''
 from ccsds import CCSDSWriter
 
 import struct
