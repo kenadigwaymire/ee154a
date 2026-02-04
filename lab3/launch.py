@@ -2,7 +2,7 @@ import os
 import platform
 import subprocess
 
-SIM_MODE = True  # Set to True to run in simulation mode
+SIM_MODE = False  # Set to True to run in simulation mode
 
 def launch():
     # 1. Identify the paths
@@ -25,7 +25,8 @@ def launch():
         # Command for Mac/Linux (uses AppleScript or xterm)
         if platform.system() == "Darwin": # Mac
             cmd_state = f"osascript -e 'tell application \"Terminal\" to do script \"cd {parent_dir} && {python_exe} {flight_name} {sim_flag}\"'"
-            cmd_ground = f"osascript -e 'tell application \"Terminal\" to do script \"cd {parent_dir} && {python_exe} {ground_name}\"'"
+            cmd_ground = f"osascript -e 'tell application \"Terminal\" to do script \"cd {parent_dir} && {python_exe} {ground_name} {sim_flag}\"'"
+            cmd_plot = f"osascript -e 'tell application \"Terminal\" to do script \"cd {parent_dir} && {python_exe} {active_plot} {sim_flag}\"'"
         else: # Linux
             cmd_state = f'gnome-terminal -- bash -c "{python_exe} {flight_name} {sim_flag}; exec bash"'
             cmd_ground = f'gnome-terminal -- bash -c "{python_exe} {ground_name} {sim_flag}; exec bash"'
