@@ -38,6 +38,8 @@ class TerminalDashboard:
             print("-" * 50)
             print(f"BME280: Pressure: {t[16]:.2f} hPa | Humidity: {t[17]:.2f}% | Temp: {t[15]:.2f}°C")
             print("-" * 50)
+            print(f"INA219: Current: {t[19]:.2f} mA | Power: {t[20]:.2f} mW | Voltage: {t[21]:.2f} mV")
+            print("-" * 50)
             print("PUT ERRORS HERE IF NEEDED")
             print("=" * 50)
         except Exception as e:
@@ -45,7 +47,7 @@ class TerminalDashboard:
 
 class GroundStation:
     """Handles the data stream and unpacking."""
-    PAYLOAD_FORMAT = ">Ifffff fff fff fff fff B"
+    PAYLOAD_FORMAT = ">Ifffff fff fff fff fff fff B"
 
     def __init__(self, simulate=False):
         self.data_folder = "simulated-data" if simulate else "data"
