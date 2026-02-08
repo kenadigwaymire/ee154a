@@ -96,7 +96,7 @@ def read_mission_data_filtered(folder_path, min_ts=None, max_ts=None):
     return data
 
 def create_window(title, x_timestamps, y_data_list, labels, y_label, color_map=None):
-    """Generates a window using scatter plots for all data points."""
+    """Generates a window using scatter plots and saves it to the graphs folder."""
     plt.figure(num=title, figsize=(10, 6))
     dates = [datetime.fromtimestamp(ts) for ts in x_timestamps]
 
@@ -118,9 +118,20 @@ def create_window(title, x_timestamps, y_data_list, labels, y_label, color_map=N
     plt.gcf().autofmt_xdate()
     plt.tight_layout()
 
+    # --- SAVE LOGIC ---
+    # Sanitize title to create a valid filename
+    filename = title.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "-") + ".png"
+    save_path = os.path.join("graphs", filename)
+    plt.savefig(save_path)
+    print(f"Saved: {save_path}")
+
 if __name__ == "__main__":
     is_sim = "--simulate" in sys.argv
     target_folder = "simulated-data" if is_sim else "data"
+    
+    # Ensure the graphs directory exists
+    if not os.path.exists("graphs"):
+        os.makedirs("graphs")
 
     min_ts, max_ts = None, None
     for arg in sys.argv:
@@ -135,35 +146,44 @@ if __name__ == "__main__":
         start_utc = datetime.fromtimestamp(mission_data['time'][0])
         end_utc = datetime.fromtimestamp(mission_data['time'][-1])
         print(f"Plotting {len(mission_data['time'])} points.")
-        print(f"Range: {start_utc} to {end_utc}")
-
+        
         mode = "SIMULATION" if is_sim else "FLIGHT"
+        time_data = mission_data['time']
 
-        # Window 1: Accelerometer
-        create_window(f"Accelerometer ({mode})", mission_data['time'],
-                      mission_data['accel'], ['X', 'Y', 'Z'], "m/s²")
+        # 1. Temperatures (5 System + 1 BME)
+        # Note: BME Temp is index 2 in your parsing logic
+        all_temps = mission_data['temps'] + [mission_data['bme'][2]]
+        temp_labels = [f'T{i+1}' for i in range(5)] + ['BME Temp']
+        temp_colors = ['#ff9999', '#ff4d4d', '#cc0000', '#800000', '#4d0000', '#0000ff']
+        create_window(f"Temperatures {mode}", time_data, all_temps, temp_labels, "°C", color_map=temp_colors)
 
-        # Window 2: Gyroscope
-        create_window(f"Gyroscope ({mode})", mission_data['time'],
-                      mission_data['gyro'], ['X', 'Y', 'Z'], "rad/s")
+        # 2. Accelerometer
+        create_window(f"Accelerometer {mode}", time_data, mission_data['accel'], ['X', 'Y', 'Z'], "m/s²")
 
-        # Window 3: Magnetometer
-        create_window(f"Magnetometer ({mode})", mission_data['time'],
-                      mission_data['mag'], ['X', 'Y', 'Z'], "μT")
+        # 3. Gyroscope
+        create_window(f"Gyroscope {mode}", time_data, mission_data['gyro'], ['X', 'Y', 'Z'], "rad/s")
 
-        # Window 4: Temperatures
-        temp_colors = ['#ff9999', '#ff4d4d', '#cc0000', '#800000', '#4d0000']
-        create_window(f"Temperatures ({mode})", mission_data['time'],
-                      mission_data['temps'], [f'T{i+1}' for i in range(5)], "°C",
-                      color_map=temp_colors)
+        # 4. Magnetometer
+        create_window(f"Magnetometer {mode}", time_data, mission_data['mag'], ['X', 'Y', 'Z'], "μT")
 
-        # Window 5: BME280
-        create_window(f"BME280 ({mode})", mission_data['time'],
-                      mission_data['bme'], ["Pressure", "Humidity", "Temp"], "hPa / % / °C")
+        # 5. BME Pressure
+        create_window(f"BME280 Pressure {mode}", time_data, [mission_data['bme'][0]], ["Pressure"], "hPa")
 
-        # Window 6: INA219
-        create_window(f"INA219 ({mode})", mission_data['time'],
-                      mission_data['ina'], ["Voltage", "Current", "Power"], "V / A / W")
+        # 6. BME Humidity
+        create_window(f"BME280 Humidity {mode}", time_data, [mission_data['bme'][1]], ["Humidity"], "%")
+
+        # 7. INA Current
+        A = [c / 1000.0 for c in mission_data['ina'][1]]
+        create_window(f"INA219 Current {mode}", time_data, [A], ["Current"], "A")
+
+        # 8. INA Power
+        W = [p / 1000.0 for p in mission_data['ina'][2]]
+        create_window(f"INA219 Power {mode}", time_data, [W], ["Power"], "W")
+        
+        # 9. Bus Voltage (Calculated from 12V rail - Shunt Voltage)
+        # Assuming d[18] (ina[0]) is Shunt Voltage in mV
+        V_bus = [(12000 - v)/1000.0 for v in mission_data['ina'][0]]
+        create_window(f"Estimated Bus Voltage {mode}", time_data, [V_bus], ["Voltage"], "V")
 
         plt.show()
     else:
