@@ -4,7 +4,7 @@ from ina219 import DeviceRangeError
 SHUNT_OHMS = 0.1
 
 class INA219Sensor:
-    def __init__(self, address=0x41, busnum=1):
+    def __init__(self, address=0x40, busnum=1):
         self.ina = INA219(SHUNT_OHMS, address=address, busnum=busnum)
         self.ina.configure()
 
