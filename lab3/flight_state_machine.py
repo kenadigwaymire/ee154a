@@ -37,8 +37,7 @@ class FlightStateMachine:
 
         # Handle initialization errors
         except Exception as e:
-            print(f"\n[CRITICAL ERROR] Hardware Initialization Failed: {e}")
-            print("Check: Is I2C enabled? Are sensors wired to the correct pins?")
+            print(f"\n[CRITICAL ERROR]: {e}")
             sys.exit(1) # Stop the script so it doesn't just 'vanish'
 
     def _setup_simulation(self):
