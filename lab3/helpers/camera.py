@@ -10,17 +10,21 @@ class HQCameraRecorder:
             os.makedirs(self.folder)
         
     def setup_camera(self, mode="video"):
-        """Configures the camera based on the desired output."""
+        """Configures the camera, ensuring it is stopped first if already running."""
+        # Check if the camera is currently streaming
+        if self.picam2.running:
+            print("Stopping camera for reconfiguration...")
+            self.picam2.stop()
+
         if mode == "video":
             config = self.picam2.create_video_configuration(main={"size": (1920, 1080)})
             print("Camera configured for 1080p Video.")
         else:
-            # Use the maximum resolution available for the sensor for stills
             config = self.picam2.create_still_configuration()
             print("Camera configured for High-Res Still.")
             
         self.picam2.configure(config)
-        self.picam2.start() # Necessary for the sensor to start streaming
+        self.picam2.start()
 
     def take_picture(self, filename="image.jpg"):
         """Captures a single high-resolution frame to disk."""
