@@ -27,7 +27,7 @@ class TerminalDashboard:
             print(f" {self.mission_name} - LIVE TELEMETRY")
             print("=" * 50)
             uptime = time.time() - self.start_time
-            print(f"TIMESTAMP: {int(t[0])} | UPTIME: {int(uptime)}s | STATUS: {'UTC' if t[15] else 'LOC'}")
+            print(f"TIMESTAMP: {int(t[0])} | UPTIME: {int(uptime)}s | TIMEZONE: {'UTC' if t[18] else 'LOC'}")
             print("-" * 50)
             print(f"TEMPERATURES (°C):")
             print(f"  T1: {t[1]:.2f} | T2: {t[2]:.2f} | T3: {t[3]:.2f} | T4: {t[4]:.2f} | T5: {t[5]:.2f}")
@@ -36,17 +36,16 @@ class TerminalDashboard:
             print(f"GYRO  (rad/s): X: {t[9]:>7.2f}  Y: {t[10]:>7.2f}  Z: {t[11]:>7.2f}")
             print(f"MAG   (μT):    X: {t[12]:>7.2f}  Y: {t[13]:>7.2f}  Z: {t[14]:>7.2f}")
             print("-" * 50)
-            if any(temp > 50 for temp in t[1:6]):
-                print(" !! WARNING: HIGH TEMPERATURE DETECTED !! ")
-            else:
-                print(" SYSTEM NOMINAL")
+            print(f"BME280: Pressure: {t[16]:.2f} hPa | Humidity: {t[17]:.2f}% | Temp: {t[15]:.2f}°C")
+            print("-" * 50)
+            print("PUT ERRORS HERE IF NEEDED")
             print("=" * 50)
         except Exception as e:
             print(f"Display Error: {e}")
 
 class GroundStation:
     """Handles the data stream and unpacking."""
-    PAYLOAD_FORMAT = ">Ifffff fff fff fff B"
+    PAYLOAD_FORMAT = ">Ifffff fff fff fff fff B"
 
     def __init__(self, simulate=False):
         self.data_folder = "simulated-data" if simulate else "data"
