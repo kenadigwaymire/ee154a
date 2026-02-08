@@ -41,6 +41,7 @@ class FlightStateMachine:
             self.bme280 = BME280Sensor()
             self.ina219 = INA219Sensor()
             self.camera = HQCameraRecorder()
+            self.camera.setup_camera(mode="still")  # Initialize camera in still mode
             
             data_folder = "simulated-data" if self.simulate else "data"
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
@@ -124,15 +125,7 @@ class FlightStateMachine:
                     bme_data = self.bme280.get_data()
                     ina_data = self.ina219.read_data()
 
-                    # Camera Logic: Capture a photo
-                    if time.time() - self.last_camera_time >= (1.0 / self.camera_rate):
-                        try:
-                            self.camera.setup_camera(mode="still")  # Ensure camera is in still mode
-                            self.camera.take_picture(f"frame_{int(time.time())}.jpg")
-                            self.camera.cleanup()  # Ensure camera is stopped after each capture
-                        except Exception as e:
-                            print(f"Error capturing camera frame: {e}")
-                        self.last_camera_time = time.time()
+                    
 
                 # Timestamp Logic
                 current_time = time.time()
@@ -149,11 +142,23 @@ class FlightStateMachine:
                 # Log the data
                 self.logger.write(payload)
 
+                # Camera Logic: Capture a photo
+                if time.time() - self.last_camera_time >= (1.0 / self.camera_rate):
+                    try:
+                        self.camera.take_picture(f"frame_{int(time.time())}.jpg")
+                    except Exception as e:
+                        print(f"Error capturing camera frame: {e}")
+                    self.last_camera_time = time.time()
+
+                # break  # Remove this line to run indefinitely; it's here just for testing purposes.
+
         # Handle graceful exit
         except KeyboardInterrupt:
             print("\nCleaning up GPIO...")
+            self.camera.cleanup() 
             import RPi.GPIO as GPIO
             GPIO.cleanup()
+           
 
 if __name__ == "__main__":
     # Check if "--simulate" was passed in the terminal command
