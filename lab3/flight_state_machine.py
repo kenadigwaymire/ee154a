@@ -126,7 +126,12 @@ class FlightStateMachine:
 
                     # Camera Logic: Capture a photo
                     if time.time() - self.last_camera_time >= (1.0 / self.camera_rate):
-                        self.camera.take_picture(f"frame_{int(time.time())}.jpg")
+                        try:
+                            self.camera.setup_camera(mode="still")  # Ensure camera is in still mode
+                            self.camera.take_picture(f"frame_{int(time.time())}.jpg")
+                            self.camera.cleanup()  # Ensure camera is stopped after each capture
+                        except Exception as e:
+                            print(f"Error capturing camera frame: {e}")
                         self.last_camera_time = time.time()
 
                 # Timestamp Logic
