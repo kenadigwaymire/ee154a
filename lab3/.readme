@@ -1,0 +1,70 @@
+README: Lab 3 Pi Mission Control
+
+---Setup Requirements---
+
+    Directory: You must be inside the lab3 folder for data logging to work correctly. If you run scripts from the root directory, data files will be created in the wrong locations.
+
+    Configuration: Before flight, ensure flight_state_machine.py and log_to_terminal.py have simulate = False.
+
+---How to Launch---
+
+The launch.py script automates the opening of three essential terminal windows.
+
+    Open launch.py and set SIM_MODE = True for testing on a laptop, or False for hardware/real testing.
+
+    Run the venv:
+    'activate' once inside the venv/Scripts/ folder
+
+    'python launch.py'
+
+---Component Overview---
+
+    Flight State Machine (flight_state_machine.py):
+
+        The core mission loop running at 10Hz.
+
+        Polls IMU and Temperature sensors.
+
+        Logs binary data to the data or simulated-data folder using CCSDS format.
+
+    Ground Station Dashboard (log_to_terminal.py):
+
+        Provides a live text-based UI of current sensor values.
+
+        Monitors system status and warns if temperatures exceed 50°C.
+
+    Active Plotter (active_plot.py):
+
+        A live-updating dashboard that refreshes every 10 seconds.
+
+        Displays four scatter plots: Accelerometer, Gyroscope, Magnetometer, and Temperatures.
+
+Data Analysis & Filtering
+
+To analyze specific datasets without running the full mission loop, use plot.py with date tags.
+
+Note: On Windows, you must wrap date arguments in double quotes to handle the | character.
+
+    To plot a specific time range:
+
+    python plot.py --minDate="02/03/2026|21:30:00" --maxDate="02/03/2026|22:00:00"
+
+    To plot simulation data:
+
+    python plot.py --simulate
+
+Interrupting & Safety
+
+    Exit: Press Ctrl+C in any terminal to stop the process.
+
+    Cleanup: The flight_state_machine.py will automatically perform a GPIO.cleanup() upon a keyboard interrupt to protect the Raspberry Pi pins.
+
+Project To-Do List
+
+    [ ] Implement Watchdog timer for system resets.
+
+    [ ] Add memory scrubbing to prevent leaks.
+
+    [ ] Enable storage limit management (deleting oldest data).
+
+    [ ] Sensor fault recognition and invalid value handling.

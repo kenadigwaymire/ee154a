@@ -15,10 +15,10 @@ from mpu9250_jmdev.mpu_9250 import MPU9250
 # Temp sensor imports
 import ADS1x15
 
+# GPIO pin imports
 import RPi.GPIO as GPIO
 
 TEMP_THRESH = 30
-
 
 class Main:
     def __init__(self):
@@ -117,17 +117,19 @@ class Main:
     
     def recordData(self):
         headers = [
-        ['ABS TIME', 
+        ['UTC TIME', 'TIME (s)' 
         'T-CPU', 'T-PCB-TOP', 'T-PCB-BOTTOM', 'T-WIRELESS-MODEM', 'T-POWER-MANAGER', 
         'X ACC', 'Y ACC', 'Z ACC', 
         'X GYRO', 'Y GYRO', 'Z GYRO', 
         'X MAG', 'Y MAG', 'Z MAG',]]
 
-        filename = input("Enter filename to save data (default: lab2.csv): ")
+        filename = input("Enter filename (DONT INCLUDE .csv) to save data (default: lab2): ").removesuffix('.csv')
         if filename.strip() == "":
             filename = "lab2.csv"
+        
+        start_time = time.time()
 
-        with open(filename, 'w', newline='') as csvfile:
+        with open(f"{filename}.csv", 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')
             writer.writerows(headers)
 
@@ -142,12 +144,9 @@ class Main:
                 # Read data from sensors
                 T1, T2, T3, T4, T5 = self.getTempData()
                 if any(t >= TEMP_THRESH for t in (T1, T2, T3, T4, T5)):
-                    print(f'GPIO HIGH')
                     GPIO.output(self.TEMP_GPIO_PIN, GPIO.HIGH)
                 else:
-                    print(f'GPIO LOW')
                     GPIO.output(self.TEMP_GPIO_PIN, GPIO.LOW)
-                
 
                 accel_data, gyro_data, mag_data = self.getImuData()
                 X_ACC, Y_ACC, Z_ACC = accel_data
@@ -155,11 +154,12 @@ class Main:
                 X_MAG, Y_MAG, Z_MAG = mag_data
 
                 # Print data as we go
-                t = datetime.now(timezone.utc)
+                utc = datetime.now(timezone.utc)
+                t = time.time() - start_time
                 print(f"time: {t}, T-CPU: {T1:.2f}, T-PCB-TOP: {T2:.2f}, T-PCB-BOTTOM: {T3:.2f}, T-WIRELESS-MODEM: {T4:.2f}, T-POWER-MANAGER: {T5:.2f}")
                 
                 # Save data to CSV
-                data = [[t, 
+                data = [[utc, t,
                         T1, T2, T3, T4, T5, 
                         X_ACC, Y_ACC, Z_ACC, 
                         X_GYRO, Y_GYRO, Z_GYRO, 
