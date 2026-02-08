@@ -9,23 +9,6 @@ class HQCameraRecorder:
         self.folder = folder
         if not os.path.exists(self.folder):
             os.makedirs(self.folder)
-        
-    def setup_camera(self, mode="video"):
-        """Configures the camera, ensuring it is stopped first if already running."""
-        # FIX: The correct way to check if picamera2 is started
-        if self.picam2.helper.running:
-            print("Stopping camera for reconfiguration...")
-            self.picam2.stop()
-
-        if mode == "video":
-            config = self.picam2.create_video_configuration(main={"size": (1920, 1080)})
-            print("Camera configured for 1080p Video.")
-        else:
-            config = self.picam2.create_still_configuration()
-            print("Camera configured for High-Res Still.")
-            
-        self.picam2.configure(config)
-        self.picam2.start()
 
     def take_picture(self, filename="image.jpg"):
         path = os.path.join(self.folder, filename)
@@ -44,11 +27,32 @@ class HQCameraRecorder:
         self.picam2.stop_recording()
         print("Recording finished.")
 
-    def cleanup(self):
-        print("Closing camera.")
-        # Check running state before stopping to avoid extra errors
-        if self.picam2.helper.running:
+    def setup_camera(self, mode="video"):
+        """Configures the camera, stopping it first if it's already active."""
+        # Use getattr to safely check for the running state
+        if getattr(self.picam2, "_running", False):
+            print("Stopping camera for reconfiguration...")
             self.picam2.stop()
+
+        if mode == "video":
+            config = self.picam2.create_video_configuration(main={"size": (1920, 1080)})
+            print("Camera configured for 1080p Video.")
+        else:
+            config = self.picam2.create_still_configuration()
+            print("Camera configured for High-Res Still.")
+            
+        self.picam2.configure(config)
+        self.picam2.start()
+
+    def cleanup(self):
+        """Safe shutdown that won't crash if already stopped."""
+        print("Closing camera.")
+        try:
+            # We don't even need to check; if it's running, it stops. 
+            # If it's not, Picamera2 usually handles it gracefully or we catch the error.
+            self.picam2.stop()
+        except Exception:
+            pass 
         self.picam2.close()
 
 if __name__ == "__main__":
