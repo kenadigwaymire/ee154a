@@ -38,7 +38,7 @@ class TerminalDashboard:
             print("-" * 50)
             print(f"BME280: Pressure: {t[16]:.2f} hPa | Humidity: {t[17]:.2f}% | Temp: {t[15]:.2f}°C")
             print("-" * 50)
-            print(f"INA219: Voltage: {t[19]:.2f} V | Current: {t[20]:.2f} mA | Power: {t[21]:.2f} mW")
+            print(f"INA219: Voltage: {t[19]:.2f} mV | Current: {t[20]:.2f} mA | Power: {t[21]:.2f} mW")
             print("-" * 50)
             print("PUT ERRORS HERE IF NEEDED")
             print("=" * 50)
