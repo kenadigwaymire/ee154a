@@ -107,6 +107,7 @@ class FlightStateMachine:
                     gyro = (random.uniform(-0.01, 0.01), random.uniform(-0.01, 0.01), random.uniform(-0.01, 0.01))
                     mag = (30.0 + random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5))
                     bme_data = (1013.25 + random.uniform(-1, 1), 40.0 + random.uniform(-0.5, 0.5), 25.0 + random.uniform(-0.5, 0.5))
+                    ina_data = (0.0, 0.0, 0.0)
                 else:
                     accel, gyro, mag = self.imu.get_data()
                     t_data = self.temp.get_all_temps()
