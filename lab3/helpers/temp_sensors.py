@@ -20,6 +20,9 @@ class TempSensor:
 
     def _calc_temp(self, res):
         """Converts resistance to Celsius."""
+        if res <= 0:
+            print(f"Warning: Invalid resistance reading: {res}")
+            return 0.0  # Return a dummy value to prevent crash
         ln_r = math.log(res)
         inv_t = self.A + (self.B * ln_r) + (self.C * ln_r**2) + (self.D * ln_r**3)
         return 1/inv_t - 273.15
