@@ -1,6 +1,7 @@
 import time
 import os
 from picamera2 import Picamera2
+from picamera2.outputs import FileOutput
 
 class HQCameraRecorder:
     def __init__(self, folder="media"):
@@ -11,8 +12,8 @@ class HQCameraRecorder:
         
     def setup_camera(self, mode="video"):
         """Configures the camera, ensuring it is stopped first if already running."""
-        # Check if the camera is currently streaming
-        if self.picam2.running:
+        # FIX: The correct way to check if picamera2 is started
+        if self.picam2.helper.running:
             print("Stopping camera for reconfiguration...")
             self.picam2.stop()
 
@@ -27,25 +28,27 @@ class HQCameraRecorder:
         self.picam2.start()
 
     def take_picture(self, filename="image.jpg"):
-        """Captures a single high-resolution frame to disk."""
         path = os.path.join(self.folder, filename)
         print(f"Capturing image: {path}")
         self.picam2.capture_file(path)
         print("Image saved.")
 
     def record_video(self, filename="video.h264", duration_seconds=5):
-        """Records H.264 video for a set duration."""
         path = os.path.join(self.folder, filename)
         print(f"Starting recording: {path}")
-        self.picam2.start_recording(path)
+        
+        # FIX: start_recording requires an output object, not just a string
+        self.picam2.start_recording(FileOutput(path))
+        
         time.sleep(duration_seconds)
         self.picam2.stop_recording()
         print("Recording finished.")
 
     def cleanup(self):
-        """Safe shutdown of the camera hardware."""
         print("Closing camera.")
-        self.picam2.stop()
+        # Check running state before stopping to avoid extra errors
+        if self.picam2.helper.running:
+            self.picam2.stop()
         self.picam2.close()
 
 if __name__ == "__main__":
@@ -56,12 +59,13 @@ if __name__ == "__main__":
         recorder.setup_camera(mode="still")
         recorder.take_picture("snapshot.jpg")
         
-        # Give the sensor a second to switch gears
         time.sleep(1) 
         
         # --- RECORD A VIDEO ---
         recorder.setup_camera(mode="video")
         recorder.record_video("mission_clip.h264", duration_seconds=10)
         
+    except Exception as e:
+        print(f"ERROR: {e}")
     finally:
         recorder.cleanup()
