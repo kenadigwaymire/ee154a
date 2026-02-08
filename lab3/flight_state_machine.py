@@ -118,7 +118,7 @@ class FlightStateMachine:
                 self.temp.set_led_alert(any(t >= 30 for t in t_data))
 
                 # Pack for CCSDS
-                print(int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, is_utc)
+                #print(int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, is_utc)
                 payload = struct.pack(">Ifffff fff fff fff fff B", 
                     int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, is_utc)
                 
