@@ -1,44 +1,63 @@
 import time
+import os
 from picamera2 import Picamera2
-from picamera2.outputs import FileOutput # Needed for recording
 
 class HQCameraRecorder:
-    def __init__(self, output_file="video.h264"):
-        self.output_file = output_file
+    def __init__(self, folder="media"):
         self.picam2 = Picamera2()
+        self.folder = folder
+        if not os.path.exists(self.folder):
+            os.makedirs(self.folder)
         
-    def setup_camera(self):
-        config = self.picam2.create_video_configuration(main={"size": (1920, 1080)})
+    def setup_camera(self, mode="video"):
+        """Configures the camera based on the desired output."""
+        if mode == "video":
+            config = self.picam2.create_video_configuration(main={"size": (1920, 1080)})
+            print("Camera configured for 1080p Video.")
+        else:
+            # Use the maximum resolution available for the sensor for stills
+            config = self.picam2.create_still_configuration()
+            print("Camera configured for High-Res Still.")
+            
         self.picam2.configure(config)
-        # Start the camera preview/stream (required before recording)
-        self.picam2.start() 
-        print("Camera configured and started.")
+        self.picam2.start() # Necessary for the sensor to start streaming
 
-    def record_video(self, duration_seconds=5):
-        print(f"Starting recording: {self.output_file}")
-        
-        # FIX: Explicitly tell it to use a FileOutput for the recording
-        self.picam2.start_recording(FileOutput(self.output_file))
-        
+    def take_picture(self, filename="image.jpg"):
+        """Captures a single high-resolution frame to disk."""
+        path = os.path.join(self.folder, filename)
+        print(f"Capturing image: {path}")
+        self.picam2.capture_file(path)
+        print("Image saved.")
+
+    def record_video(self, filename="video.h264", duration_seconds=5):
+        """Records H.264 video for a set duration."""
+        path = os.path.join(self.folder, filename)
+        print(f"Starting recording: {path}")
+        self.picam2.start_recording(path)
         time.sleep(duration_seconds)
-        
         self.picam2.stop_recording()
         print("Recording finished.")
 
-    def close(self):
-        """Cleanly release hardware"""
+    def cleanup(self):
+        """Safe shutdown of the camera hardware."""
+        print("Closing camera.")
         self.picam2.stop()
         self.picam2.close()
 
 if __name__ == "__main__":
-    recorder = HQCameraRecorder("my_pi_video.h264")
+    recorder = HQCameraRecorder()
     
     try:
-        recorder.setup_camera()
-        recorder.record_video(10) 
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        # --- TAKE A PICTURE ---
+        recorder.setup_camera(mode="still")
+        recorder.take_picture("snapshot.jpg")
+        
+        # Give the sensor a second to switch gears
+        time.sleep(1) 
+        
+        # --- RECORD A VIDEO ---
+        recorder.setup_camera(mode="video")
+        recorder.record_video("mission_clip.h264", duration_seconds=10)
+        
     finally:
-        # FIX: Use 'recorder' instead of 'self'
-        print("Closing camera.")
-        recorder.close()
+        recorder.cleanup()
