@@ -3,7 +3,7 @@ import smbus2
 import bme280
 
 # BME280 sensor address (default address)
-address = 0x76
+address = 0x77
 
 # Initialize I2C bus
 bus = smbus2.SMBus(1)
