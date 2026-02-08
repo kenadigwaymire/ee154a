@@ -29,11 +29,13 @@ class FlightStateMachine:
             from helpers.temp_sensors import TempSensor
             from helpers.ccsds import CCSDSWriter
             from helpers.bme_280 import BME280Sensor
+            from helpers.ina219 import INA219Sensor
 
             # Initialize Hardware
             self.imu = IMUSensor()
             self.temp = TempSensor()
             self.bme280 = BME280Sensor()
+            self.ina219 = INA219Sensor()
             
             data_folder = "simulated-data" if self.simulate else "data"
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
@@ -109,6 +111,7 @@ class FlightStateMachine:
                     accel, gyro, mag = self.imu.get_data()
                     t_data = self.temp.get_all_temps()
                     bme_data = self.bme280.get_data()
+                    ina_data = self.ina219.read_data()
 
                 # Timestamp Logic
                 current_time = time.time()
@@ -119,8 +122,8 @@ class FlightStateMachine:
 
                 # Pack for CCSDS
                 #print(int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, is_utc)
-                payload = struct.pack(">Ifffff fff fff fff fff B", 
-                    int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, is_utc)
+                payload = struct.pack(">Ifffff fff fff fff fff fff B", 
+                    int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, is_utc)
                 
                 # Log the data
                 self.logger.write(payload)
