@@ -5,7 +5,7 @@ SHUNT_OHMS = 0.1
 
 class INA219Sensor:
     def __init__(self):
-        self.ina = INA219(SHUNT_OHMS)
+        self.ina = INA219(SHUNT_OHMS, address = 0x41)
         self.ina.configure()
 
     def read_data(self):
