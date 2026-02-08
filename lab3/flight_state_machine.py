@@ -4,6 +4,8 @@ import os
 import time
 import random
 from unittest.mock import MagicMock
+import smbus2
+import bme280
 
 class FlightStateMachine:
     """
@@ -26,10 +28,12 @@ class FlightStateMachine:
             from helpers.imu_sensor import IMUSensor
             from helpers.temp_sensors import TempSensor
             from helpers.ccsds import CCSDSWriter
+            from helpers.bme_280 import BME280Sensor
 
             # Initialize Hardware
             self.imu = IMUSensor()
             self.temp = TempSensor()
+            self.bme280 = BME280Sensor()
             
             data_folder = "simulated-data" if self.simulate else "data"
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
@@ -86,6 +90,7 @@ class FlightStateMachine:
         import RPi.GPIO as GPIO
         GPIO.BCM, GPIO.OUT, GPIO.HIGH, GPIO.LOW = 11, 1, 1, 0
 
+
     def run(self):
         """The main mission loop."""
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
@@ -99,9 +104,11 @@ class FlightStateMachine:
                     accel = (random.uniform(-0.1, 0.1), random.uniform(-0.1, 0.1), 9.8 + random.uniform(-0.1, 0.1))
                     gyro = (random.uniform(-0.01, 0.01), random.uniform(-0.01, 0.01), random.uniform(-0.01, 0.01))
                     mag = (30.0 + random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5))
+                    bme_data = (1013.25 + random.uniform(-1, 1), 40.0 + random.uniform(-0.5, 0.5), 25.0 + random.uniform(-0.5, 0.5))
                 else:
                     accel, gyro, mag = self.imu.get_data()
                     t_data = self.temp.get_all_temps()
+                    bme_data = self.bme280.get_data()
 
                 # Timestamp Logic
                 current_time = time.time()
@@ -111,9 +118,9 @@ class FlightStateMachine:
                 self.temp.set_led_alert(any(t >= 30 for t in t_data))
 
                 # Pack for CCSDS
-                #print(int(current_time), *t_data, *accel, *gyro, *mag, is_utc)
-                payload = struct.pack(">Ifffff fff fff fff B", 
-                    int(current_time), *t_data, *accel, *gyro, *mag, is_utc)
+                print(int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, is_utc)
+                payload = struct.pack(">Ifffff fff fff fff fff B", 
+                    int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, is_utc)
                 
                 # Log the data
                 self.logger.write(payload)
