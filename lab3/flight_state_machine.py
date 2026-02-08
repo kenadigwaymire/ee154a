@@ -17,6 +17,9 @@ class FlightStateMachine:
         self.simulate = simulate        # Simulation mode for pc testing
         self.sample_rate = sample_rate  # Hz
         self.start_time = time.time()   # For uptime calculations
+        self.camera_rate = 1/60       
+        self.last_camera_time = time.time() - (1.0 / self.camera_rate) 
+        self.loop_start = time.time() - (1.0 / self.sample_rate)    
 
         # Reminder: you are working in simulation mode
         if self.simulate:
@@ -30,12 +33,14 @@ class FlightStateMachine:
             from helpers.ccsds import CCSDSWriter
             from helpers.bme_280 import BME280Sensor
             from helpers.ina219 import INA219Sensor
+            from helpers.camera import HQCameraRecorder
 
             # Initialize Hardware
             self.imu = IMUSensor()
             self.temp = TempSensor()
             self.bme280 = BME280Sensor()
             self.ina219 = INA219Sensor()
+            self.camera = HQCameraRecorder()
             
             data_folder = "simulated-data" if self.simulate else "data"
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
@@ -98,7 +103,12 @@ class FlightStateMachine:
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
         try:
             while True:
-                loop_start = time.time()
+                # Precise Timing
+                elapsed = time.time() - self.loop_start
+                wait_time = (1.0 / self.sample_rate) - elapsed
+                if wait_time > 0: continue
+
+                self.loop_start = time.time()
 
                 # 1. Collect Data       
                 if self.simulate:
@@ -114,6 +124,11 @@ class FlightStateMachine:
                     bme_data = self.bme280.get_data()
                     ina_data = self.ina219.read_data()
 
+                    # Camera Logic: Capture a photo
+                    if time.time() - self.last_camera_time >= (1.0 / self.camera_rate):
+                        self.camera.take_picture(f"frame_{int(time.time())}.jpg")
+                        self.last_camera_time = time.time()
+
                 # Timestamp Logic
                 current_time = time.time()
                 is_utc = 1 if self.is_utc_valid else 0
@@ -128,12 +143,6 @@ class FlightStateMachine:
                 
                 # Log the data
                 self.logger.write(payload)
-
-                # Precise Timing
-                elapsed = time.time() - loop_start
-                sleep_time = (1.0 / self.sample_rate) - elapsed
-                if sleep_time > 0:
-                    time.sleep(sleep_time)
 
         # Handle graceful exit
         except KeyboardInterrupt:
