@@ -38,7 +38,14 @@ class TempSensor:
         temps = []
         for i, val in enumerate(raw_vals):
             v = val * (f1 if i < 4 else f2)
-            r = ((self.R_VAL * self.VCC) / v) - self.R_VAL
+            
+            # Check if voltage is too low to be a real reading
+            if v <= 0.001: 
+                print(f"Warning: Sensor {i} reading 0V! Check wiring.")
+                r = 0 
+            else:
+                r = ((self.R_VAL * self.VCC) / v) - self.R_VAL
+            
             temps.append(self._calc_temp(r))
         return temps
 
