@@ -53,38 +53,52 @@ class GroundStation:
         self.dash = TerminalDashboard(mission_name="Fuck u")
 
     def run(self):
-        print(f"Ground Station Active. Monitoring: {self.data_folder}")
+        filepath = os.path.join(self.data_folder, "telemetry.ccsds")
+        print(f"Ground Station Active. Monitoring Live: {filepath}")
         
-        try:
-            while True:
-                # Check if folder exists or has files
-                files = glob.glob(os.path.join(self.data_folder, "*.ccsds"))
-                
-                if not files:
-                    self.dash.display_message("NO DATA DETECTED - Waiting for Mission Start...")
-                    time.sleep(2)
-                    continue
+        # Ensure the file exists before trying to open it
+        while not os.path.exists(filepath):
+            self.dash.display_message("WAITING FOR FILE - telemetry.ccsds not found...")
+            time.sleep(1)
 
-                # Stream the files
-                found_valid_packet = False
-                for packet_dict in self.reader.stream_all_files():
-                    found_valid_packet = True
-                    raw_payload = packet_dict["payload"]
+        with open(filepath, "rb") as f:
+            # JUMP TO THE END: Skip all historical data to get only the current line
+            f.seek(0, os.SEEK_END)
+            
+            try:
+                while True:
+                    curr_pos = f.tell()
+                    header_data = f.read(6)
                     
-                    try:
-                        unpacked_data = struct.unpack(self.PAYLOAD_FORMAT, raw_payload)
-                        self.dash.display(unpacked_data)
-                        time.sleep(0.1) # Refresh rate
-                    except struct.error:
-                        # Don't crash on one bad packet, just skip it
+                    if len(header_data) < 6:
+                        # No new packet yet. Reset the pointer to where the header should start
+                        f.seek(curr_pos)
+                        time.sleep(0.05) # Check 20 times per second
                         continue
-                
-                if not found_valid_packet:
-                    self.dash.display_message("INVALID DATA - Files found but packets are unreadable.")
-                    time.sleep(2)
+                    
+                    # Unpack the 6-byte CCSDS header
+                    header = struct.unpack(">HHH", header_data)
+                    length = header[2] + 1
+                    
+                    # Read the payload based on the length in the header
+                    payload = f.read(length)
+                    
+                    if len(payload) < length:
+                        # Packet is incomplete (being written). Reset to start of header.
+                        f.seek(curr_pos)
+                        time.sleep(0.05)
+                        continue
 
-        except KeyboardInterrupt:
-            print("\n[GS] Ground Station Offline.")
+                    # Success! Unpack and display the live data
+                    try:
+                        unpacked_data = struct.unpack(self.PAYLOAD_FORMAT, payload)
+                        self.dash.display(unpacked_data)
+                    except struct.error:
+                        # Handle corrupted packets or format mismatches
+                        continue
+
+            except KeyboardInterrupt:
+                print("\n[GS] Ground Station Offline.")
 
 if __name__ == "__main__":
     is_sim = "--simulate" in sys.argv
