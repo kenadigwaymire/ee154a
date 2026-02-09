@@ -152,13 +152,13 @@ if __name__ == "__main__":
 
         # 1. Temperatures (5 System + 1 BME)
         # Note: BME Temp is index 2 in your parsing logic
-        all_temps = mission_data['temps'] + [mission_data['bme'][2]]
+        all_temps = mission_data['temps'] + [mission_data['bme'][0]]
         temp_labels = [f'T{i+1}' for i in range(5)] + ['BME Temp']
         temp_colors = ['#ff9999', '#ff4d4d', '#cc0000', '#800000', '#4d0000', '#0000ff']
         create_window(f"Temperatures {mode}", time_data, all_temps, temp_labels, "°C", color_map=temp_colors)
 
         # 2. Accelerometer
-        create_window(f"Accelerometer {mode}", time_data, mission_data['accel'], ['X', 'Y', 'Z'], "m/s²")
+        create_window(f"Accelerometer {mode}", time_data, mission_data['accel'], ['X', 'Y', 'Z'], "m/s² OR g")
 
         # 3. Gyroscope
         create_window(f"Gyroscope {mode}", time_data, mission_data['gyro'], ['X', 'Y', 'Z'], "rad/s")
@@ -167,22 +167,22 @@ if __name__ == "__main__":
         create_window(f"Magnetometer {mode}", time_data, mission_data['mag'], ['X', 'Y', 'Z'], "μT")
 
         # 5. BME Pressure
-        create_window(f"BME280 Pressure {mode}", time_data, [mission_data['bme'][0]], ["Pressure"], "hPa")
+        create_window(f"BME280 Pressure {mode}", time_data, [mission_data['bme'][1]], ["Pressure"], "hPa")
 
         # 6. BME Humidity
-        create_window(f"BME280 Humidity {mode}", time_data, [mission_data['bme'][1]], ["Humidity"], "%")
+        create_window(f"BME280 Humidity {mode}", time_data, [mission_data['bme'][2]], ["Humidity"], "%")
 
         # 7. INA Current
-        A = [c / 1000.0 for c in mission_data['ina'][1]]
+        A = [c / 1000.0 for c in mission_data['ina'][0]]
         create_window(f"INA219 Current {mode}", time_data, [A], ["Current"], "A")
 
         # 8. INA Power
-        W = [p / 1000.0 for p in mission_data['ina'][2]]
+        W = [p / 1000.0 for p in mission_data['ina'][1]]
         create_window(f"INA219 Power {mode}", time_data, [W], ["Power"], "W")
         
         # 9. Bus Voltage (Calculated from 12V rail - Shunt Voltage)
         # Assuming d[18] (ina[0]) is Shunt Voltage in mV
-        V_bus = [(12000 - v)/1000.0 for v in mission_data['ina'][0]]
+        V_bus = [(12000 - v)/1000.0 for v in mission_data['ina'][2]]
         create_window(f"Estimated Bus Voltage {mode}", time_data, [V_bus], ["Voltage"], "V")
 
         plt.show()

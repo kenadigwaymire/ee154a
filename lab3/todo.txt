@@ -1,14 +1,10 @@
 Trey's todo list. not actually important for lab, I just wanted to.
 
 Changes from last week we need to add
+- IMU calibration script to run on state machine startup
+- Fix simulation mode / delete and just add error handling
 - Watchdog timer force reset if main loop fails
-- Auto plotting from set range of date/timer
-- Auto read latest data
-- Memory scrubbing to avoid memory leaks
-- System health monitor
+- Auto read latest data. current script lags behind
+- System health monitor or just display when sensor loose
 - Sensor fault recognition and handling (too high or invalid values)
-- if approaching storage limits, delete oldest data
-- convert to state machine with safe mode for minimal operation
-- add a test for i2c connectiions at launch and allow correction
 - be able to handle internal clock and ISS RTC and syncing
-- clear transmitions between data logging and boot and safe modes
