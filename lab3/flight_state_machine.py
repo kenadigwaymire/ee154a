@@ -3,6 +3,7 @@ import struct
 import os
 import time
 import random
+from unittest.mock import MagicMock
 import smbus2
 import bme280
 
@@ -12,13 +13,18 @@ class FlightStateMachine:
     REASONING: Controls the "Mission Loop." Can run on a laptop (Simulation) 
                or on the ISS hardware (Flight).
     """
-    def __init__(self, sample_rate=10):
+    def __init__(self, sample_rate=10, simulate=False):
+        self.simulate = simulate        # Simulation mode for pc testing
         self.sample_rate = sample_rate  # Hz
         self.start_time = time.time()   # For uptime calculations
         self.camera_rate = 1/60       
         self.last_camera_time = time.time() - (1.0 / self.camera_rate) 
         self.loop_start = time.time() - (1.0 / self.sample_rate)    
-        data_folder = "data"
+
+        # Reminder: you are working in simulation mode
+        if self.simulate:
+            self._setup_simulation()
+            print("--- INITIALIZED IN SIMULATION MODE ---")
         
         # hardware imports
         try:
@@ -28,27 +34,70 @@ class FlightStateMachine:
             from helpers.bme_280 import BME280Sensor
             from helpers.ina219 import INA219Sensor
             from helpers.camera import HQCameraRecorder
-        except ImportError as e:
-            print(f"Error importing hardware libraries: {e}")
-            print("Make sure you're running this on a Raspberry Pi with the required libraries installed.")
-            sys.exit(1)
-        
-        try:
+
             # Initialize Hardware
             self.imu = IMUSensor()
             self.temp = TempSensor()
             self.bme280 = BME280Sensor()
             self.ina219 = INA219Sensor()
             self.camera = HQCameraRecorder()
-            self.camera.setup_camera(mode="still")  # Initialize camera in still mode TODO add video mode later
+            self.camera.setup_camera(mode="still")  # Initialize camera in still mode
             
+            data_folder = "simulated-data" if self.simulate else "data"
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
-            self.is_utc_valid = True  # TODO: In a real mission, you'd check if the RTC is set to UTC time.
+            self.is_utc_valid = not self.simulate 
 
         # Handle initialization errors
         except Exception as e:
-            print(f"\nError Initializing Hardware: {e}")
+            print(f"\n[CRITICAL ERROR]: {e}")
             sys.exit(1) # Stop the script so it doesn't just 'vanish'
+
+    def _setup_simulation(self):
+        """Injects fake modules into the system to prevent crashes on laptops.
+        
+        MagicMock is used to create dummy classes and constants that mimic
+        the real hardware libraries, allowing the rest of the code to run"""
+
+        # Define Registers/Constants
+        mock_regs = MagicMock()
+        mock_regs.AK8963_ADDRESS = 0x0C
+        mock_regs.MPU9050_ADDRESS_68 = 0x68
+        mock_regs.AK8963_BIT_16 = 0x01
+        mock_regs.AK8963_MODE_C100HZ = 0x06
+        mock_regs.GFS_1000 = 0x02
+        mock_regs.AFS_8G = 0x02
+
+        # Inject Modules
+        mocks = ["RPi", "RPi.GPIO", "ADS1x15", "mpu9250_jmdev", 
+                 "mpu9250_jmdev.registers", "mpu9250_jmdev.mpu_9250"]
+        
+        for module in mocks:
+            sys.modules[module] = MagicMock()
+        
+        # Attach Constants
+        sys.modules["mpu9250_jmdev.registers"] = mock_regs
+        
+        # Define Fake Hardware Classes
+        class MockADS:
+            def __init__(self, bus, address): self.PGA_4_096V = 4.096
+            # def 
+
+        class MockMPU:
+            def __init__(self, **kwargs): pass
+            # def configure(self): pass
+            # def readAccelerometerMaster(self): return (0.0, 0.0, 9.8 + random.uniform(-0.1, 0.1))
+            # def readGyroscopeMaster(self): return (random.uniform(-0.1, 0.1), 0.0, 0.0)
+            # def readMagnetometerMaster(self): return (30.0 + random.uniform(-1, 1), 0.0, 0.0)
+
+        import ADS1x15
+        ADS1x15.ADS1115 = MockADS
+
+        import mpu9250_jmdev.mpu_9250
+        mpu9250_jmdev.mpu_9250.MPU9250 = MockMPU
+        
+        import RPi.GPIO as GPIO
+        GPIO.BCM, GPIO.OUT, GPIO.HIGH, GPIO.LOW = 11, 1, 1, 0
+
 
     def run(self):
         """The main mission loop."""
@@ -62,25 +111,38 @@ class FlightStateMachine:
 
                 self.loop_start = time.time()
 
-                # Collect Data Using Sensor Classes     
-                accel, gyro, mag = self.imu.get_data()
-                t_data = self.temp.get_all_temps()
-                bme_data = self.bme280.get_data()
-                ina_data = self.ina219.read_data()
-  
+                # 1. Collect Data       
+                if self.simulate:
+                    t_data = [20.0 + random.uniform(-0.5, 0.5) for _ in range(5)]
+                    accel = (random.uniform(-0.1, 0.1), random.uniform(-0.1, 0.1), 9.8 + random.uniform(-0.1, 0.1))
+                    gyro = (random.uniform(-0.01, 0.01), random.uniform(-0.01, 0.01), random.uniform(-0.01, 0.01))
+                    mag = (30.0 + random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5))
+                    bme_data = (1013.25 + random.uniform(-1, 1), 40.0 + random.uniform(-0.5, 0.5), 25.0 + random.uniform(-0.5, 0.5))
+                    ina_data = (0.0, 0.0, 0.0)
+                else:
+                    accel, gyro, mag = self.imu.get_data()
+                    t_data = self.temp.get_all_temps()
+                    bme_data = self.bme280.get_data()
+                    ina_data = self.ina219.read_data()
+
+                    
+
                 # Timestamp Logic
                 current_time = time.time()
-                is_utc = 1 if self.is_utc_valid else 0 #TODO, look at this for realtime clock logic, this is just a placeholder
+                is_utc = 1 if self.is_utc_valid else 0
 
-                # Pack for CCSDS (Converts to binary fomat for efficient logging)
-                # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
+                # Safety Logic (LED Alert)
+                self.temp.set_led_alert(any(t >= 30 for t in t_data))
+
+                # Pack for CCSDS
+                #print(int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, is_utc)
                 payload = struct.pack(">Ifffff fff fff fff fff fff B", 
                     int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, is_utc)
                 
-                # Log the data in data folder with CCSDS format (Binary)
+                # Log the data
                 self.logger.write(payload)
 
-                # Camera Logic: Capture a photo #TODO add video mode later, this is just a placeholder for now
+                # Camera Logic: Capture a photo
                 if time.time() - self.last_camera_time >= (1.0 / self.camera_rate):
                     try:
                         self.camera.take_picture(f"frame_{int(time.time())}.jpg")
@@ -98,7 +160,10 @@ class FlightStateMachine:
             GPIO.cleanup()
            
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
+    # Check if "--simulate" was passed in the terminal command
+    is_sim = "--simulate" in sys.argv
+    
     # Pass that result into your class
-    mission = FlightStateMachine(sample_rate=10)
+    mission = FlightStateMachine(sample_rate=10, simulate=is_sim)
     mission.run()
