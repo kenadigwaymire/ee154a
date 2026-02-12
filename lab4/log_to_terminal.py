@@ -7,7 +7,7 @@ from helpers.ccsds import CCSDSReader
 
 class TerminalDashboard:
     """Renders the UI to the terminal."""
-    def __init__(self, mission_name="AstroPi Mission 2026"):
+    def __init__(self, mission_name="System Debug Terminal"):
         self.mission_name = mission_name
         self.start_time = time.time()
 
