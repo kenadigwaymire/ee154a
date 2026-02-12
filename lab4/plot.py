@@ -126,8 +126,7 @@ def create_window(title, x_timestamps, y_data_list, labels, y_label, color_map=N
     print(f"Saved: {save_path}")
 
 if __name__ == "__main__":
-    is_sim = "--simulate" in sys.argv
-    target_folder = "simulated-data" if is_sim else "data"
+    target_folder = "data"
     
     # Ensure the graphs directory exists
     if not os.path.exists("graphs"):

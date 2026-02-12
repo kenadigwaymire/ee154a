@@ -9,8 +9,7 @@ import bme280
 class FlightStateMachine:
     """
     PURPOSE: Coordinates timing, sensor polling, and CCSDS logging.
-    REASONING: Controls the "Mission Loop." Can run on a laptop (Simulation) 
-               or on the ISS hardware (Flight).
+    REASONING: Controls the "Mission Loop." 
     """
     def __init__(self, sample_rate=10):
         self.sample_rate = sample_rate  # Hz
@@ -81,14 +80,15 @@ class FlightStateMachine:
                 self.logger.write(payload)
 
                 # Camera Logic: Capture a photo #TODO add video mode later, this is just a placeholder for now
-                if time.time() - self.last_camera_time >= (1.0 / self.camera_rate):
+                if time.time() - self.last_camera_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
                     try:
                         self.camera.take_picture(f"frame_{int(time.time())}.jpg")
                     except Exception as e:
                         print(f"Error capturing camera frame: {e}")
                     self.last_camera_time = time.time()
 
-                # break  # Remove this line to run indefinitely; it's here just for testing purposes.
+                # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
+
 
         # Handle graceful exit
         except KeyboardInterrupt:
