@@ -40,7 +40,11 @@ class TerminalDashboard:
             print("-" * 50)
             print(f"INA219: Voltage: {t[21]:.2f} mV | Current: {t[19]:.2f} mA | Power: {t[20]:.2f} W")
             print("-" * 50)
-            print("PUT ERRORS HERE IF NEEDED")
+            print("SENSOR STATUS: " +
+                  f"BME280: {'OK' if t[22] else 'FAIL'} | " +
+                  f"INA219: {'OK' if t[23] else 'FAIL'} | " +
+                  f"IMU: {'OK' if t[24] else 'FAIL'} | " +
+                  f"Temp: {'OK' if t[25] else 'FAIL'}")
             print("=" * 50)
         except Exception as e:
             print(f"Display Error: {e}")

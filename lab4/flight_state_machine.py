@@ -40,7 +40,6 @@ class FlightStateMachine:
             self.ina219 = INA219Sensor()
             self.camera = HQCameraRecorder()
             self.camera.setup_camera(mode="still")  # Initialize camera in still mode TODO add video mode later
-            
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
             self.is_utc_valid = True  # TODO: In a real mission, you'd check if the RTC is set to UTC time.
 
@@ -61,11 +60,17 @@ class FlightStateMachine:
 
                 self.loop_start = time.time()
 
-                # Collect Data Using Sensor Classes     
+                # Collect sensor data
                 accel, gyro, mag = self.imu.get_data()
                 t_data = self.temp.get_all_temps()
                 bme_data = self.bme280.get_data()
                 ina_data = self.ina219.read_data()
+
+                # Get status of each  
+                bme280_status = 1 if self.bme280.connected else 0
+                ina219_status = 1 if self.ina219.connected else 0
+                imu_status = 1 if self.imu.connected else 0
+                temp_status = 1 if self.temp.connected else 0
   
                 # Timestamp Logic
                 current_time = time.time()
@@ -73,8 +78,8 @@ class FlightStateMachine:
 
                 # Pack for CCSDS (Converts to binary fomat for efficient logging)
                 # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
-                payload = struct.pack(">Ifffff fff fff fff fff fff B", 
-                    int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, is_utc)
+                payload = struct.pack(">Ifffff fff fff fff fff fff BBBBB", 
+                    int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, is_utc, bme280_status, ina219_status, imu_status, temp_status)
                 
                 # Log the data in data folder with CCSDS format (Binary)
                 self.logger.write(payload)

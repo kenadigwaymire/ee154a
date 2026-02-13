@@ -7,8 +7,8 @@ import matplotlib.dates as mdates
 from datetime import datetime
 
 # 1. Configuration
-# ts, 5 temps, 3 accel, 3 gyro, 3 mag, 3 bme, 3 ina, is_utc
-PAYLOAD_FORMAT = ">Ifffff fff fff fff fff fff B"
+# ts, 5 temps, 3 accel, 3 gyro, 3 mag, 3 bme, 3 ina, is_utc, bme280_status, ina219_status, imu_status, temp_status
+PAYLOAD_FORMAT = ">Ifffff fff fff fff fff fff BBBBB"
 HEADER_SIZE = 6
 
 def parse_date_arg(date_str):
@@ -30,7 +30,11 @@ def read_mission_data_filtered(folder_path, min_ts=None, max_ts=None):
         'gyro':  [[] for _ in range(3)],
         'mag':   [[] for _ in range(3)],
         'bme':   [[] for _ in range(3)],   # [pressure_hPa, humidity_pct, temp_C] (per your bme280.get_data())
-        'ina':   [[] for _ in range(3)]    # [voltage, current, power] (per your ina219.read_data())
+        'ina':   [[] for _ in range(3)],   # [voltage, current, power] (per your ina219.read_data())
+        'bme280_status':    [],
+        'ina219_status':    [],
+        'imu_status':       [],
+        'temp_status':      []
     }
 
     files = sorted(glob.glob(os.path.join(folder_path, "*.ccsds")))
