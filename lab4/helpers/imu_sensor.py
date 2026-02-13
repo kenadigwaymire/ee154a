@@ -52,4 +52,4 @@ class IMUSensor:
             print(f"[IMU Data Error]: Could not read sensor data: {e}")
             accel, gyro, mag = nan_triple, nan_triple, nan_triple
         
-        return accel, gyro, mag
+        return (accel, gyro, mag)

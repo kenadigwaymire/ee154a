@@ -7,48 +7,75 @@ class TempSensor:
     REASONING: Complex math should be hidden inside the class to prevent clutter.
     """
     def __init__(self, gpio_pin=15):
-        self.ads1 = ADS1x15.ADS1115(1, 0x49)
-        self.ads2 = ADS1x15.ADS1115(1, 0x48)
-        self.gpio_pin = gpio_pin
-        
-        # Steinhart-Hart Coefficients
-        self.A, self.B, self.C, self.D = 1.0219e-3, 2.4145e-4, -2.4762e-7, 1.6539e-7
-        self.R_VAL, self.VCC = 6800, 3.3
+        try:
+            self.ads1 = ADS1x15.ADS1115(1, 0x49)
+            self.ads2 = ADS1x15.ADS1115(1, 0x48)
+            self.gpio_pin = gpio_pin
+            
+            # Steinhart-Hart Coefficients
+            self.A, self.B, self.C, self.D = 1.0219e-3, 2.4145e-4, -2.4762e-7, 1.6539e-7
+            self.R_VAL, self.VCC = 6800, 3.3
 
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.gpio_pin, GPIO.OUT)
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(self.gpio_pin, GPIO.OUT)
+            self.connected = True
+        except Exception as e:
+            print(f"[TempSensor Initialization Error]: {e}")
+            self.connected = False
 
     def _calc_temp(self, res):
         """Converts resistance to Celsius."""
-        if res <= 0:
+
+        if res <= 0 or res is None or res == float('nan'):
             print(f"Warning: Invalid resistance reading: {res}")
-            return 0.0  # Return a dummy value to prevent crash
+            return float('nan')  # Return a NaN value to prevent crash
+        
         ln_r = math.log(res)
         inv_t = self.A + (self.B * ln_r) + (self.C * ln_r**2) + (self.D * ln_r**3)
         return 1/inv_t - 273.15
 
     def get_all_temps(self):
         """Reads ADCs and returns a list of 5 temperatures."""
-        f1, f2 = self.ads1.toVoltage(), self.ads2.toVoltage()
         
-        # Read raw ADC and convert to Voltage -> Resistance -> Temp
-        raw_vals = [self.ads1.readADC(0), self.ads1.readADC(1), 
-                    self.ads1.readADC(2), self.ads1.readADC(3), self.ads2.readADC(1)]
-        
-        temps = []
-        for i, val in enumerate(raw_vals):
-            v = val * (f1 if i < 4 else f2)
+        # return nan if sensors all disconnected
+        nan = float('nan')
+        if not self.connected:
+            return [nan] * 5
+        try:
+            f1, f2 = self.ads1.toVoltage(), self.ads2.toVoltage()
             
-            # Check if voltage is too low to be a real reading
-            if v <= 0.001: 
-                print(f"Warning: Sensor {i} reading 0V! Check wiring.")
-                r = 0 
-            else:
-                r = ((self.R_VAL * self.VCC) / v) - self.R_VAL
+            # Read raw ADC and convert to Voltage -> Resistance -> Temp
+            raw_vals = [self.ads1.readADC(0), self.ads1.readADC(1), 
+                        self.ads1.readADC(2), self.ads1.readADC(3), self.ads2.readADC(1)]
             
-            temps.append(self._calc_temp(r))
-        return temps
+            # for each sensor, check if voltage is too low to be a real reading; 
+            # if so, print warning and return NaN for that sensor. 
+            # Otherwise, calculate resistance and temp as normal.
+            temps = []
+            for i, val in enumerate(raw_vals):
+                # Convert raw ADC to voltage (using f1 for first 4 sensors, f2 for last sensor)
+                v = val * (f1 if i < 4 else f2)
+                
+                # Check if voltage is too low to be a real reading
+                if v <= 0.001: 
+                    print(f"Warning: Sensor {i} reading <0.001V! Check wiring.")
+                    temps.append(nan)
+                    continue
+                    r = 0 
+                else:
+                    r = ((self.R_VAL * self.VCC) / v) - self.R_VAL
+                    try:
+                        temp = self._calc_temp(r)
+                    except Exception as e:
+                        print(f"[TempSensor Math Error]: {e}")
+                        temp = nan
+                    temps.append(temp)
 
-    def set_led_alert(self, state):
-        """Toggles the GPIO pin based on threshold logic."""
-        GPIO.output(self.gpio_pin, GPIO.HIGH if state else GPIO.LOW)
+            return temps
+        except Exception as e:
+            print(f"[TempSensor Data Error]: {e}")
+            return [nan] * 5
+
+    # def set_led_alert(self, state):
+    #     """Toggles the GPIO pin based on threshold logic."""
+    #     GPIO.output(self.gpio_pin, GPIO.HIGH if state else GPIO.LOW)
