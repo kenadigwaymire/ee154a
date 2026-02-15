@@ -17,7 +17,7 @@ class RV8803:
                 print(f'RTC not connected but no exception.')
                 self.connected = False
             else:
-                self.rtc.clear_vlf() 
+                self.rtc._i2c.write_byte(0x32, 0x0E, 0x00)
                 self.rtc.update_time()
                 self.connected = True
         except Exception as e:
@@ -37,7 +37,7 @@ class RV8803:
         print(f'Syncing RTC to {curr_time.strftime('%Y-%m-%d %H:%M:%S')}')
         
         self.rtc.set_time(curr_time.second, curr_time.minute, curr_time.hour, weekday, curr_time.day, curr_time.month, curr_time.year)
-        self.rtc.clear_vlf()
+        self.rtc._i2c.write_byte(0x32, 0x0E, 0x00)
         print(f'RTC successfully set, time: {self.read_data()}')
 
     def read_data(self):
