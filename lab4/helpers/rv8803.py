@@ -32,7 +32,20 @@ class RV8803:
             print('Why the fuck arent you doing anything dumbass')
 
         curr_time = datetime.now()
-        weekday = curr_time.isoweekday()
+        wd = curr_time.isoweekday()
+
+        weekday_map = {
+            0: self.rtc.kMonday,
+            1: self.rtc.kTuesday,
+            2: self.rtc.kWednesday,
+            3: self.rtc.kThursday,
+            4: self.rtc.kFriday,
+            5: self.rtc.kSaturday,
+            6: self.rtc.kSunday,
+        }
+
+        weekday = weekday_map[wd]
+
 
         print(f'Syncing RTC to {curr_time.strftime('%Y-%m-%d %H:%M:%S')}')
 
