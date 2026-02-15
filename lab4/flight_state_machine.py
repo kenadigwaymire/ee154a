@@ -139,10 +139,11 @@ class FlightStateMachine:
     def handle_time_sync(self):
         self.curr_time = time.time()
         try:
-            if self.rtc.connected:
-                if self.rtc.read_data() != self.curr_time:
-                    self.rtc.sync_system_clock()
-                    self.curr_time = time.time()
+            if self.rtc:
+                if self.rtc.connected:
+                    if self.rtc.read_data() != self.curr_time:
+                        self.rtc.sync_system_clock()
+                        self.curr_time = time.time()
         except Exception as e:
             print(e)
 
@@ -264,7 +265,11 @@ class FlightStateMachine:
                     self.handle_data_collection()
 
                 # Camera Logic (pass if not connecyed)
-                if not self.camera_connected: continue
+                if not self.camera:
+                    continue
+                if not self.camera_connected: 
+                    continue
+            
 
                 # CHOOSE ONLY ONE OF THESE AND CHANGE MODE IN INIT
                 # self.handle_photos()
@@ -279,12 +284,14 @@ class FlightStateMachine:
         finally:
             print("\nCleaning up GPIO...")
             try:
-                self.camera.cleanup()
+                if self.camera:
+                    self.camera.cleanup()
             except:
                 pass
             try:
-                self.led.off() 
-                self.led.cleanup()
+                if self.led:
+                    self.led.off() 
+                    self.led.cleanup()
             except:
                 pass
             import RPi.GPIO as GPIO
