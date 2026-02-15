@@ -26,6 +26,7 @@ class MPL3115A2:
                 time.sleep(0.1)
             else:
                 print(f'MPL3115A2 but device ID is incorrect, check connections/sensor.')
+                self.connected = False
             self.connected = True
         except Exception as e:
             print(f'{e}: No device found at 0x{address:x}, check wiring and power.')
