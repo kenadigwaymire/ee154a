@@ -193,7 +193,7 @@ class FlightStateMachine:
             *bme_data, 
             *ina_data, 
             mpl_data,
-            gps_data,
+            *gps_data,
             bme280_status, 
             ina219_status, 
             imu_status, 
