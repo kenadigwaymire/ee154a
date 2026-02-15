@@ -6,6 +6,7 @@ import random
 import smbus2
 import bme280
 import signal
+import datetime
 
 def service_shutdown(signum, frame):
     print(f"Caught signal {signum}. Shutting down mission...")
@@ -146,11 +147,12 @@ class FlightStateMachine:
         self.rtc_init()
 
     def handle_time_sync(self):
-        self.curr_time = time.time()
+        #self.curr_time = time.time()
+        system_time_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         try:
             if self.rtc:
                 if self.rtc.connected:
-                    if self.rtc.read_data() != self.curr_time:
+                    if self.rtc.read_data() != system_time_str:
                         self.rtc.sync_system_clock()
                         self.curr_time = time.time()
         except Exception as e:
