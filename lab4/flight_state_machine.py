@@ -17,7 +17,7 @@ class FlightStateMachine:
         self.camera_rate = 1/60       
         self.last_photo_time = time.time() - (1.0 / self.camera_rate) 
         self.loop_start = time.time() - (1.0 / self.sample_rate)   
-        self.video_duration = 5 # sec 
+        self.video_duration = 10 # sec 
         self.video_active = False
         self.last_video_time = time.time()
         self.camera_mode  = "video"
