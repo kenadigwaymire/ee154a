@@ -337,7 +337,7 @@ class FlightStateMachine:
 
                 # CHOOSE ONLY ONE OF THESE AND CHANGE MODE IN INIT
                 # self.handle_photos()
-                # self.handle_video_recording()  
+                self.handle_video_recording()  
 
                 # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
 
