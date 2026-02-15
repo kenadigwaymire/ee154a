@@ -176,6 +176,8 @@ class FlightStateMachine:
             try:
                 accel, gyro, mag = self.imu.get_data()
                 imu_status = 1
+                if accel == triple_nan or gyro == triple_nan or mag == triple_nan:
+                    imu_status = 0
             except Exception:
                 accel, gyro, mag = triple_nan, triple_nan, triple_nan
                 imu_status = 0
@@ -187,7 +189,7 @@ class FlightStateMachine:
         if self.temp:
             try:
                 t_data = self.temp.get_all_temps()
-                temp_status = 1
+                temp_status = 1 if t_data != quad_nan else 0
             except Exception:
                 t_data = quad_nan
                 temp_status = 0
@@ -199,7 +201,7 @@ class FlightStateMachine:
         if self.bme280:
             try:
                 bme_data = self.bme280.get_data()
-                bme280_status = 1
+                bme280_status = 1 if bme_data != triple_nan else 0
             except Exception:
                 bme_data = triple_nan
                 bme280_status = 0
@@ -211,7 +213,7 @@ class FlightStateMachine:
         if self.ina219:
             try:
                 ina_data = self.ina219.read_data()
-                ina219_status = 1
+                ina219_status = 1 if ina_data != triple_nan else 0
             except Exception:
                 ina_data = triple_nan
                 ina219_status = 0
@@ -223,7 +225,7 @@ class FlightStateMachine:
         if self.mpl:
             try:
                 mpl_data = self.mpl.read_data()
-                mpl_status = 1
+                mpl_status = 1 if mpl_data != nan else 0
             except Exception:
                 mpl_data = nan
                 mpl_status = 0
@@ -235,7 +237,7 @@ class FlightStateMachine:
         if self.gps:
             try:
                 gps_data = self.gps.read_data()
-                gps_status = 1
+                gps_status = 1 if gps_data != triple_nan else 0
             except Exception:
                 gps_data = triple_nan
                 gps_status = 0
