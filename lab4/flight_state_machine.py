@@ -7,6 +7,7 @@ import smbus2
 import bme280
 import signal
 import datetime
+import math
 
 def service_shutdown(signum, frame):
     print(f"Caught signal {signum}. Shutting down mission...")
@@ -164,6 +165,11 @@ class FlightStateMachine:
 
         self.loop_start = self.curr_time
 
+        def is_failed(data):
+            if isinstance(data, tuple):
+                return any(math.isnan(x) for x in data)
+            return math.isnan(data)
+
         # --- RTC STATUS ---
         if self.rtc:
             try:
@@ -177,13 +183,15 @@ class FlightStateMachine:
             t = nan
             rtc_status = 0
 
-        # --- IMU (Accel, Gyro, Mag) ---
+        # --- IMU ---
         if self.imu:
             try:
                 accel, gyro, mag = self.imu.get_data()
-                imu_status = 1
-                if accel == triple_nan or gyro == triple_nan or mag == triple_nan:
+                # If any part of the IMU read is NaN, mark as FAIL
+                if is_failed(accel) or is_failed(gyro) or is_failed(mag):
                     imu_status = 0
+                else:
+                    imu_status = 1
             except Exception:
                 accel, gyro, mag = triple_nan, triple_nan, triple_nan
                 imu_status = 0
@@ -195,7 +203,7 @@ class FlightStateMachine:
         if self.temp:
             try:
                 t_data = self.temp.get_all_temps()
-                temp_status = 1 if t_data != quad_nan else 0
+                temp_status = 0 if is_failed(t_data) else 1
             except Exception:
                 t_data = quad_nan
                 temp_status = 0
@@ -207,7 +215,7 @@ class FlightStateMachine:
         if self.bme280:
             try:
                 bme_data = self.bme280.get_data()
-                bme280_status = 1 if bme_data != triple_nan else 0
+                bme280_status = 0 if is_failed(bme_data) else 1
             except Exception:
                 bme_data = triple_nan
                 bme280_status = 0
@@ -219,7 +227,7 @@ class FlightStateMachine:
         if self.ina219:
             try:
                 ina_data = self.ina219.read_data()
-                ina219_status = 1 if ina_data != triple_nan else 0
+                ina219_status = 0 if is_failed(ina_data) else 1
             except Exception:
                 ina_data = triple_nan
                 ina219_status = 0
@@ -231,7 +239,7 @@ class FlightStateMachine:
         if self.mpl:
             try:
                 mpl_data = self.mpl.read_data()
-                mpl_status = 1 if mpl_data != nan else 0
+                mpl_status = 0 if is_failed(mpl_data) else 1
             except Exception:
                 mpl_data = nan
                 mpl_status = 0
@@ -243,7 +251,7 @@ class FlightStateMachine:
         if self.gps:
             try:
                 gps_data = self.gps.read_data()
-                gps_status = 1 if gps_data != triple_nan else 0
+                gps_status = 0 if is_failed(gps_data) else 1
             except Exception:
                 gps_data = triple_nan
                 gps_status = 0
