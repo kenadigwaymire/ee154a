@@ -7,8 +7,17 @@ class BME280Sensor:
     PURPOSE: Handles BME280 I2C communication and data sampling.
     ERROR HANDLING: If the sensor fails to initialize or read, it returns NaN values instead of crashing the mission loop. This allows the rest of the system to function even if one sensor fails.
     """
+
+    SEA_LEVEL_PRESSURE_HPA = 1013.25
+    CONST_FT = 145442
+    CONST_M = 44330
+    EXP_CONST = 0.1903
+
     def __init__(self, address=0x77, bus_id=1):
         self.address = address
+        self.temp = 0
+        self.pressure = 0
+        self.humidity = 0
 
         # Attempt to initialize the sensor and load calibration parameters
         try:
@@ -31,8 +40,11 @@ class BME280Sensor:
         try:
             data = bme280.sample(self.bus, self.address, self.calibration_params)
             temp = data.temperature
+            self.temp = temp
             pressure = data.pressure
+            self.pressure = pressure
             humidity = data.humidity
+            self.humidity = humidity
             
             if temp is None:
                 print(f"BME280 temperature reading None, defaulting to NaN")
@@ -49,3 +61,19 @@ class BME280Sensor:
         except Exception as e:
             print(f"[BME280 Data Error]: Failed to read sensor: {e}")
             return (nan, nan, nan)
+        
+    def calculate_altitude_ft(self):
+        nan = float('nan')
+        try: 
+            return self.CONST_FT * (1 - ((self.pressure / self.SEA_LEVEL_PRESSURE_HPA) ** self.EXP_CONST))
+        except Exception as e:
+            print(f'Some sensor being stupid: {e}')
+            return nan
+    
+    def calculate_altitude_m(self):
+        nan = float('nan')
+        try:
+            return self.CONST_M * (1 - ((self.pressure / self.SEA_LEVEL_PRESSURE_HPA) ** self.EXP_CONST))
+        except Exception as e:
+            print(f'Some sensor being stupid: {e}')
+            return nan
