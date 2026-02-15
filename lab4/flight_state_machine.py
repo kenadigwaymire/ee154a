@@ -163,49 +163,80 @@ class FlightStateMachine:
 
         self.loop_start = self.curr_time
 
+        # --- RTC STATUS ---
         if self.rtc:
-            rtc_status = 1 if self.rtc.connected else 0
+            rtc_status = 1 if self.rtc.rtc.update_time() else 0
         else:
             rtc_status = 0
 
+        # --- IMU (Accel, Gyro, Mag) ---
         if self.imu:
-            accel, gyro, mag = self.imu.get_data()
-            imu_status = 1 if self.imu.connected else 0
+            try:
+                accel, gyro, mag = self.imu.get_data()
+                imu_status = 1
+            except Exception:
+                accel, gyro, mag = triple_nan, triple_nan, triple_nan
+                imu_status = 0
         else:
-            accel, gyro, mag = (triple_nan, triple_nan, triple_nan)
+            accel, gyro, mag = triple_nan, triple_nan, triple_nan
             imu_status = 0
 
+        # --- TEMPERATURE SENSORS ---
         if self.temp:
-            t_data = self.temp.get_all_temps()
-            temp_status = 1 if self.temp.connected else 0
+            try:
+                t_data = self.temp.get_all_temps()
+                temp_status = 1
+            except Exception:
+                t_data = quad_nan
+                temp_status = 0
         else:
             t_data = quad_nan
             temp_status = 0
 
+        # --- BME280 ---
         if self.bme280:
-            bme_data = self.bme280.get_data()
-            bme280_status = 1 if self.bme280.connected else 0
+            try:
+                bme_data = self.bme280.get_data()
+                bme280_status = 1
+            except Exception:
+                bme_data = triple_nan
+                bme280_status = 0
         else:
             bme_data = triple_nan
             bme280_status = 0
 
+        # --- INA219 ---
         if self.ina219:
-            ina_data = self.ina219.read_data()
-            ina219_status = 1 if self.ina219.connected else 0
+            try:
+                ina_data = self.ina219.read_data()
+                ina219_status = 1
+            except Exception:
+                ina_data = triple_nan
+                ina219_status = 0
         else:
             ina_data = triple_nan
             ina219_status = 0
 
+        # --- MPL3115A2 ---
         if self.mpl:
-            mpl_data = self.mpl.read_data()
-            mpl_status = 1 if self.mpl.connected else 0
+            try:
+                mpl_data = self.mpl.read_data()
+                mpl_status = 1
+            except Exception:
+                mpl_data = nan
+                mpl_status = 0
         else:
             mpl_data = nan
             mpl_status = 0
 
+        # --- GPS ---
         if self.gps:
-            gps_data = self.gps.read_data()
-            gps_status = 1 if self.gps.connected else 0
+            try:
+                gps_data = self.gps.read_data()
+                gps_status = 1
+            except Exception:
+                gps_data = triple_nan
+                gps_status = 0
         else:
             gps_data = triple_nan
             gps_status = 0
