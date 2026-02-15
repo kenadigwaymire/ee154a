@@ -35,10 +35,8 @@ class RV8803:
         weekday = curr_time.isoweekday()
 
         print(f'Syncing RTC to {curr_time.strftime('%Y-%m-%d %H:%M:%S')}')
-        
-        year_short = curr_time.year % 100
 
-        self.rtc.set_time(curr_time.second, curr_time.minute, curr_time.hour, weekday, curr_time.day, curr_time.month, year_short)
+        self.rtc.set_time(curr_time.second, curr_time.minute, curr_time.hour, weekday, curr_time.day, curr_time.month, curr_time.year)
         self.rtc._i2c.write_byte(0x32, 0x0E, 0x00)
         print(f'RTC successfully set, time: {self.read_data()}')
 
@@ -47,16 +45,26 @@ class RV8803:
 
         if not self.connected:
             return nan
-        
+
         try:
-            if self.rtc.update_time():
-                return self.rtc.string_date_time
-            else:
-                return nan
-    
+            self.rtc.update_time()
+
+            # Extract fields from library
+            year = self.rtc.get_year()
+            month = self.rtc.get_month()
+            day = self.rtc.get_date()
+            hour = self.rtc.get_hours()
+            minute = self.rtc.get_minutes()
+            second = self.rtc.get_seconds()
+
+            # Convert to Unix timestamp
+            dt = datetime(year, month, day, hour, minute, second)
+            return dt.timestamp()
+
         except Exception as e:
-            print(f'Some dumb shit happening with RV8803" {e}')
+            print(f"RV8803 read error: {e}")
             return nan
+
     
     def sync_system_clock(self):
         """Read time from RTC and update the Raspberry Pi OS system time."""
