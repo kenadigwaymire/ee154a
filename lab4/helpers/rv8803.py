@@ -36,7 +36,9 @@ class RV8803:
 
         print(f'Syncing RTC to {curr_time.strftime('%Y-%m-%d %H:%M:%S')}')
         
-        self.rtc.set_time(curr_time.second, curr_time.minute, curr_time.hour, weekday, curr_time.day, curr_time.month, curr_time.year)
+        year_short = curr_time.year % 100
+
+        self.rtc.set_time(curr_time.second, curr_time.minute, curr_time.hour, weekday, curr_time.day, curr_time.month, year_short)
         self.rtc._i2c.write_byte(0x32, 0x0E, 0x00)
         print(f'RTC successfully set, time: {self.read_data()}')
 
