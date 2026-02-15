@@ -58,6 +58,7 @@ class FlightStateMachine:
         self.initialize_sensors()
 
     def camera_init(self):
+        from helpers.camera import HQCameraRecorder
         try:
             self.camera = HQCameraRecorder()
             self.camera.setup_camera(mode=self.camera_mode)
@@ -71,6 +72,7 @@ class FlightStateMachine:
     
     def imu_init(self):
         try:
+            from helpers.imu_sensor import IMUSensor
             self.imu = IMUSensor()
         except Exception as e:
             self.imu = None
@@ -78,6 +80,7 @@ class FlightStateMachine:
 
     def temp_init(self):
         try:
+            from helpers.temp_sensors import TempSensor
             self.temp = TempSensor()
         except Exception as e:
             self.temp = None
@@ -85,6 +88,7 @@ class FlightStateMachine:
 
     def bme280_init(self):
         try:
+            from helpers.bme_280 import BME280Sensor
             self.bme280 = BME280Sensor()
         except Exception as e:
             self.bme280 = None
@@ -92,6 +96,7 @@ class FlightStateMachine:
 
     def ina_init(self):
         try:
+            from helpers.ina219 import INA219Sensor
             self.ina219 = INA219Sensor()
         except Exception as e:
             self.ina219 = None
@@ -99,6 +104,7 @@ class FlightStateMachine:
 
     def mpl_init(self):
         try:
+            from helpers.mpl3115a2 import MPL3115A2
             self.mpl = MPL3115A2()
         except Exception as e:
             self.mpl = None
@@ -106,6 +112,7 @@ class FlightStateMachine:
             
     def led_init(self):
         try:
+            from helpers.led import LEDIndicator
             self.led = LEDIndicator()
         except Exception as e:
             self.led = None
@@ -113,6 +120,7 @@ class FlightStateMachine:
     
     def gps_init(self):
         try:
+            from helpers.gp3906 import GP3906
             self.gps = GP3906()
         except Exception as e:
             self.gps = None
@@ -120,6 +128,7 @@ class FlightStateMachine:
 
     def rtc_init(self):
         try:
+            from helpers.rv8803 import RV8803
             self.rtc = RV8803()
         except Exception as e:
             self.rtc = None
