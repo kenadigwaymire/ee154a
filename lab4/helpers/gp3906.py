@@ -25,7 +25,7 @@ class GP3906:
             return nan, nan, nan
         
         try:
-            line = self.ser.readline.decode('ascii', errors='replace').strip()
+            line = self.ser.readline().decode('ascii', errors='replace').strip()
             # with altitude
             if line.startswith('$GPGGA'):
                 msg = pynmea2.parse(line)
