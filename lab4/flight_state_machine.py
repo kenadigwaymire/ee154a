@@ -235,7 +235,7 @@ class FlightStateMachine:
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
         
         try:
-            self.led.on()
+            if self.led: self.led.on()
             while True:
                 self.handle_time_sync()
 
