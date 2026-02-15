@@ -32,7 +32,7 @@ class RV8803:
             print('Why the fuck arent you doing anything dumbass')
 
         curr_time = datetime.now()
-        wd = curr_time.isoweekday()
+        wd = curr_time.weekday()
 
         weekday_map = {
             0: self.rtc.kMonday,
