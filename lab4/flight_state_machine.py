@@ -166,9 +166,20 @@ class FlightStateMachine:
         self.loop_start = self.curr_time
 
         def is_failed(data):
-            if isinstance(data, tuple):
-                return any(math.isnan(x) for x in data)
-            return math.isnan(data)
+            # Accept list/tuple (and any nested tuples)
+            if isinstance(data, (list, tuple)):
+                for x in data:
+                    if isinstance(x, (list, tuple)):
+                        if is_failed(x):
+                            return True
+                    else:
+                        if isinstance(x, float) and math.isnan(x):
+                            return True
+                return False
+
+            # Single scalar
+            return isinstance(data, float) and math.isnan(data)
+
 
         # --- RTC STATUS ---
         if self.rtc:
