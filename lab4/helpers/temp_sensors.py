@@ -9,7 +9,6 @@ class TempSensor:
     def __init__(self, gpio_pin=15):
         try:
             self.ads1 = ADS1x15.ADS1115(1, 0x49)
-            self.ads2 = ADS1x15.ADS1115(1, 0x48)
             self.gpio_pin = gpio_pin
             
             # Steinhart-Hart Coefficients
@@ -42,11 +41,11 @@ class TempSensor:
         if not self.connected:
             return [nan] * 5
         try:
-            f1, f2 = self.ads1.toVoltage(), self.ads2.toVoltage()
+            f1 = self.ads1.toVoltage()
             
             # Read raw ADC and convert to Voltage -> Resistance -> Temp
             raw_vals = [self.ads1.readADC(0), self.ads1.readADC(1), 
-                        self.ads1.readADC(2), self.ads1.readADC(3), self.ads2.readADC(1)]
+                        self.ads1.readADC(2), self.ads1.readADC(3)]
             
             # for each sensor, check if voltage is too low to be a real reading; 
             # if so, print warning and return NaN for that sensor. 
@@ -54,7 +53,7 @@ class TempSensor:
             temps = []
             for i, val in enumerate(raw_vals):
                 # Convert raw ADC to voltage (using f1 for first 4 sensors, f2 for last sensor)
-                v = val * (f1 if i < 4 else f2)
+                v = val * f1
                 
                 # Check if voltage is too low to be a real reading
                 if v <= 0.001: 
