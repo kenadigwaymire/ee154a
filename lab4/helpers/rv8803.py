@@ -37,6 +37,7 @@ class RV8803:
         print(f'Syncing RTC to {curr_time.strftime('%Y-%m-%d %H:%M:%S')}')
         
         self.rtc.set_time(curr_time.second, curr_time.minute, curr_time.hour, weekday, curr_time.day, curr_time.month, curr_time.year)
+        self.rtc.clear_vlf()
         print(f'RTC successfully set, time: {self.read_data()}')
 
     def read_data(self):
