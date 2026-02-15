@@ -138,7 +138,67 @@ class FlightStateMachine:
                     self.curr_time = time.time()
         except Exception as e:
             print(e)
+    def handle_data_collection(self):
+        nan = float('nan')
+        self.loop_start = self.curr_time
 
+        # Collect sensor data
+        if self.imu:
+            accel, gyro, mag = self.imu.get_data()
+        else:
+            accel, gyro, mag = nan, nan, nan
+        if self.temp:
+            t_data = self.temp.get_all_temps()
+        else:
+            t_data = nan, nan, nan, nan
+        if self.bme280:
+            bme_data = self.bme280.get_data()
+        else:
+            bme_data = nan, nan, nan
+        if self.ina219:
+            ina_data = self.ina219.read_data()
+        else:
+            ina_data = nan, nan, nan
+        if self.mpl:
+            mpl_data = self.mpl.read_data()
+        else:
+            mpl_data = nan
+        if self.gps:
+            gps_data = self.gps.read_data()
+        else:
+            gps_data = nan, nan, nan
+
+        # Get status of each  
+        bme280_status = 1 if self.bme280.connected else 0
+        ina219_status = 1 if self.ina219.connected else 0
+        imu_status = 1 if self.imu.connected else 0
+        temp_status = 1 if self.temp.connected else 0
+        mpl_status = 1 if self.mpl.connected else 0
+        gps_status = 1 if self.gps.connected else 0
+
+        # Pack for CCSDS (Converts to binary fomat for efficient logging)
+        # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
+        payload = struct.pack(
+            ">Iffff fff fff fff fff fff fff f BBBBBB", 
+            int(self.curr_time), 
+            *t_data, 
+            *accel, 
+            *gyro, 
+            *mag, 
+            *bme_data, 
+            *ina_data, 
+            mpl_data,
+            gps_data,
+            bme280_status, 
+            ina219_status, 
+            imu_status, 
+            temp_status,
+            mpl_status,
+            gps_status
+            )
+        
+        # Log the data in data folder with CCSDS format (Binary)
+        self.logger.write(payload)
     def handle_photos(self):
         if self.curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
             try:
@@ -167,7 +227,7 @@ class FlightStateMachine:
     def run(self):
         """The main mission loop."""
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
-        nan = float('nan')
+        
         try:
             self.led.on()
             while True:
@@ -181,65 +241,7 @@ class FlightStateMachine:
 
                 # Gather data at specified Hz
                 else:
-                    self.loop_start = self.curr_time
-
-                    # Collect sensor data
-                    if self.imu:
-                        accel, gyro, mag = self.imu.get_data()
-                    else:
-                        accel, gyro, mag = nan, nan, nan
-                    if self.temp:
-                        t_data = self.temp.get_all_temps()
-                    else:
-                        t_data = nan, nan, nan, nan
-                    if self.bme280:
-                        bme_data = self.bme280.get_data()
-                    else:
-                        bme_data = nan, nan, nan
-                    if self.ina219:
-                        ina_data = self.ina219.read_data()
-                    else:
-                        ina_data = nan, nan, nan
-                    if self.mpl:
-                        mpl_data = self.mpl.read_data()
-                    else:
-                        mpl_data = nan
-                    if self.gps:
-                        gps_data = self.gps.read_data()
-                    else:
-                        gps_data = nan, nan, nan
-
-                    # Get status of each  
-                    bme280_status = 1 if self.bme280.connected else 0
-                    ina219_status = 1 if self.ina219.connected else 0
-                    imu_status = 1 if self.imu.connected else 0
-                    temp_status = 1 if self.temp.connected else 0
-                    mpl_status = 1 if self.mpl.connected else 0
-                    gps_status = 1 if self.gps.connected else 0
-
-                    # Pack for CCSDS (Converts to binary fomat for efficient logging)
-                    # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
-                    payload = struct.pack(
-                        ">Iffff fff fff fff fff fff fff f BBBBBB", 
-                        int(self.curr_time), 
-                        *t_data, 
-                        *accel, 
-                        *gyro, 
-                        *mag, 
-                        *bme_data, 
-                        *ina_data, 
-                        mpl_data,
-                        gps_data,
-                        bme280_status, 
-                        ina219_status, 
-                        imu_status, 
-                        temp_status,
-                        mpl_status,
-                        gps_status
-                        )
-                    
-                    # Log the data in data folder with CCSDS format (Binary)
-                    self.logger.write(payload)
+                    self.handle_data_collection()
 
                 # Camera Logic (pass if not connecyed)
                 if not self.camera_connected: continue
