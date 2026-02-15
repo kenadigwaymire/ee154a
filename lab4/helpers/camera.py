@@ -1,7 +1,7 @@
 import time
 import os
 from picamera2 import Picamera2
-from picamera2.outputs import FfmpegOutput
+from picamera2.outputs import FfmpegOutput, FileOutput
 from picamera2.encoders import H264Encoder
 
 class HQCameraRecorder:
@@ -21,12 +21,13 @@ class HQCameraRecorder:
         path = os.path.join(self.folder, filename)
         # Bitrate: 10Mbps
         encoder = H264Encoder(10000000)
-        video_output = FfmpegOutput(path)
+        # video_output = FfmpegOutput(path)
         
         print(f"Starting recording: {path}")
         # Passing encoder and output as explicit arguments fixes the TypeError
-        self.picam2.start_recording(encoder, output=video_output)
-        
+        # self.picam2.start_recording(encoder, output=video_output)
+        self.picam2.start_recording(encoder, output=path)
+
     def stop_video(self):
         self.picam2.stop_recording()
         print("Recording finished.")
