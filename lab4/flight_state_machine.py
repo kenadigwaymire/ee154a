@@ -5,6 +5,12 @@ import time
 import random
 import smbus2
 import bme280
+import signal
+
+def service_shutdown(signum, frame):
+    print(f"Caught signal {signum}. Shutting down mission...")
+    raise KeyboardInterrupt  # This forces the 'finally' block to trigger
+
 
 class FlightStateMachine:
     """
@@ -12,15 +18,18 @@ class FlightStateMachine:
     REASONING: Controls the "Mission Loop." 
     """
     def __init__(self, sample_rate=10):
+        curr_time = time.time()
         self.sample_rate = sample_rate  # Hz
-        self.start_time = time.time()   # For uptime calculations
+        self.start_time = curr_time   # For uptime calculations
         self.camera_rate = 1/60       
-        self.last_photo_time = time.time() - (1.0 / self.camera_rate) 
-        self.loop_start = time.time() - (1.0 / self.sample_rate)   
+        self.last_photo_time = curr_time - (1.0 / self.camera_rate) 
+        self.loop_start = curr_time - (1.0 / self.sample_rate)   
         self.video_duration = 10 # sec 
         self.video_active = False
-        self.last_video_time = time.time()
+        self.last_video_time = curr_time
         self.camera_mode  = "video"
+        self.led_flash_dur = 1.0 # sec
+        self.last_led_flash = curr_time
         data_folder = "data"
         
         # hardware imports
@@ -32,6 +41,8 @@ class FlightStateMachine:
             from helpers.ina219 import INA219Sensor
             from helpers.camera import HQCameraRecorder
             from helpers.mpl3115a2 import MPL3115A2
+            from helpers.led import LEDIndicator
+
         except ImportError as e:
             print(f"Error importing hardware libraries: {e}")
             print("Make sure you're running this on a Raspberry Pi with the required libraries installed.")
@@ -56,6 +67,7 @@ class FlightStateMachine:
             self.ina219 = INA219Sensor()
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
             self.mpl = MPL3115A2()
+            self.led = LEDIndicator()
 
         # Handle initialization errors
         except Exception as e:
@@ -66,6 +78,7 @@ class FlightStateMachine:
         """The main mission loop."""
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
         try:
+            self.led.on()
             while True:
                 curr_time = time.time()
                 elapsed = curr_time - self.loop_start
@@ -74,6 +87,10 @@ class FlightStateMachine:
                     continue
                 else:
                     self.loop_start = curr_time
+                    # # Flash LED Example
+                    # if curr_time - self.last_led_flash >= self.led_flash_dur:
+                    #     self.led.toggle()
+                    #     self.last_led_flash = curr_time
 
                     # Collect sensor data
                     accel, gyro, mag = self.imu.get_data()
@@ -144,13 +161,26 @@ class FlightStateMachine:
 
         # Handle graceful exit
         except KeyboardInterrupt:
+            print("Ending script")
+        finally:
             print("\nCleaning up GPIO...")
-            self.camera.cleanup() 
+            try:
+                self.camera.cleanup()
+            except:
+                pass
+            try:
+                self.led.off() 
+                self.led.cleanup()
+            except:
+                pass
             import RPi.GPIO as GPIO
-            GPIO.cleanup()
-           
+            GPIO.cleanup()           
 
-if __name__ == "__main__":    
+if __name__ == "__main__":  
+    # tells watchdog script to run cleanup
+    signal.signal(signal.SIGTERM, service_shutdown)
+    signal.signal(signal.SIGINT, service_shutdown)
+
     # Pass that result into your class
     mission = FlightStateMachine(sample_rate=10)
     mission.run()
