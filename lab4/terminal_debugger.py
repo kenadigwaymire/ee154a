@@ -62,7 +62,7 @@ class TerminalDashboard:
             
             print(f"SENSOR STATUS:")
             print(f"  BME280: {ok(stat_bme)} | INA219: {ok(stat_ina)} | IMU: {ok(stat_imu)}")
-            print(f"  TEMPS:  {ok(stat_temp)} | MPL:    {ok(stat_mpl)} | GPS:    {ok(stat_gps)}")
+            print(f"  TEMPS:  {ok(stat_temp)} | MPL: {ok(stat_mpl)} | GPS: {ok(stat_gps)}")
             print(f"  RTC:  {ok(stat_rtc)}")
             print("=" * 55)
 
