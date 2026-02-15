@@ -166,8 +166,15 @@ class FlightStateMachine:
 
         # --- RTC STATUS ---
         if self.rtc:
-            rtc_status = 1 if self.rtc.rtc.update_time() else 0
+            try:
+                t = self.rtc.read_data()
+                rtc_status = 1
+            except Exception:
+                t = nan
+                imu_status = 0
+
         else:
+            t = nan
             rtc_status = 0
 
         # --- IMU (Accel, Gyro, Mag) ---
