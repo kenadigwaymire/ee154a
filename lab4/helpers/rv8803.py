@@ -45,29 +45,14 @@ class RV8803:
 
         if not self.connected:
             return nan
-
+        
         try:
             self.rtc.update_time()
-
-            year = 2000 + self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxYear])
-            month = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxMonth])
-            day = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxDate])
-            hour = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxHours])
-            minute = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxMinutes])
-            second = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxSeconds])
-
-            # If RTC not initialized (day == 0), return NaN
-            if day == 0 or month == 0:
-                return nan
-
-            dt = datetime(year, month, day, hour, minute, second)
-
-            return dt.timestamp()
-
+            return self.rtc.get_epoch()
+        
         except Exception as e:
             print(f'RV8803 read error: {e}')
             return nan
-
 
     
     def sync_system_clock(self):
