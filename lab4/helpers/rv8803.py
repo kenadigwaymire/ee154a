@@ -17,6 +17,8 @@ class RV8803:
                 print(f'RTC not connected but no exception.')
                 self.connected = False
             else:
+                self.rtc.clear_vlf() 
+                self.rtc.update_time()
                 self.connected = True
         except Exception as e:
             print(f'RTC not connected: {e}')
