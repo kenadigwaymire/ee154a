@@ -118,13 +118,12 @@ class FlightStateMachine:
             self.gps = None
             print(e)
     
-    def initialize_sensors():
+    def initialize_sensors(self):
         self.camera_init()
         self.imu_init()
         self.temp_init()
         self.bme280_init()
-        self.ina219_init()
-        self.logger_init()
+        self.ina_init()
         self.mpl_init()
         self.led_init()
         self.gps_init()
