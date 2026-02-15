@@ -6,7 +6,6 @@ import glob
 from helpers.ccsds import CCSDSReader
 
 class TerminalDashboard:
-    """Renders the UI to the terminal."""
     def __init__(self, mission_name="System Debug Terminal"):
         self.mission_name = mission_name
         self.start_time = time.time()
@@ -14,38 +13,56 @@ class TerminalDashboard:
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def display_message(self, message):
-        """Displays a simple status message without crashing."""
-        self.clear_screen()
-        print(f"[{self.mission_name}] STATUS: {message}")
-
     def display(self, data_packet):
         try:
-            t = data_packet
+            # --- 1. NAMED UNPACKING ---
+            # This must match  PAYLOAD_FORMAT exactly
+            (
+                ts, 
+                t1, t2, t3, t4,                  # 4 Temps
+                ax, ay, az,                      # Accel
+                gx, gy, gz,                      # Gyro
+                mx, my, mz,                      # Mag
+                bme_temp, bme_pres, bme_hum,     # BME280
+                ina_curr, ina_pwr, ina_volt,     # INA219
+                mpl,
+                stat_bme, stat_ina, stat_imu, stat_temp, stat_mpl # BBBBB (Status Flags)
+            ) = data_packet
+
             self.clear_screen()
-            print("=" * 50)
-            print(f" {self.mission_name} - LIVE TELEMETRY")
-            print("=" * 50)
             uptime = time.time() - self.start_time
-            print(f"TIMESTAMP: {int(t[0])} | UPTIME: {int(uptime)}s | TIMEZONE: {'UTC' if t[18] else 'LOC'}")
-            print("-" * 50)
+
+            print("=" * 55)
+            print(f" {self.mission_name} - LIVE TELEMETRY")
+            print("=" * 55)
+            print(f"TIME: {int(ts)} | UPTIME: {int(uptime)}s | MODE: {'UTC' if is_utc else 'LOC'}")
+            print("-" * 55)
+            
             print(f"TEMPERATURES (°C):")
-            print(f"  T1: {t[1]:.2f} | T2: {t[2]:.2f} | T3: {t[3]:.2f} | T4: {t[4]:.2f} | T5: {t[5]:.2f}")
-            print("-" * 50)
-            print(f"ACCEL (m/s²):  X: {t[6]:>7.2f}  Y: {t[7]:>7.2f}  Z: {t[8]:>7.2f}")
-            print(f"GYRO  (rad/s): X: {t[9]:>7.2f}  Y: {t[10]:>7.2f}  Z: {t[11]:>7.2f}")
-            print(f"MAG   (μT):    X: {t[12]:>7.2f}  Y: {t[13]:>7.2f}  Z: {t[14]:>7.2f}")
-            print("-" * 50)
-            print(f"BME280: Pressure: {t[16]:.2f} hPa | Humidity: {t[17]:.2f}% | Temp: {t[15]:.2f}°C")
-            print("-" * 50)
-            print(f"INA219: Voltage: {t[21]:.2f} mV | Current: {t[19]:.2f} mA | Power: {t[20]:.2f} W")
-            print("-" * 50)
-            print("SENSOR STATUS: " +
-                  f"BME280: {'OK' if t[22] else 'FAIL'} | " +
-                  f"INA219: {'OK' if t[23] else 'FAIL'} | " +
-                  f"IMU: {'OK' if t[24] else 'FAIL'} | " +
-                  f"Temp: {'OK' if t[25] else 'FAIL'}")
-            print("=" * 50)
+            print(f"  T1:{t1:>5.1f} T2:{t2:>5.1f} T3:{t3:>5.1f} T4:{t4:>5.1f} T5:{t5:>5.1f}")
+            print(f"  BME Temp: {bme_temp:.2f}°C")
+            print("-" * 55)
+            
+            print(f"IMU DATA:")
+            print(f"  ACCEL (m/s²):  X:{ax:>6.2f}  Y:{ay:>6.2f}  Z:{az:>6.2f}")
+            print(f"  GYRO  (rad/s): X:{gx:>6.2f}  Y:{gy:>6.2f}  Z:{gz:>6.2f}")
+            print(f"  MAG   (μT):    X:{mx:>6.2f}  Y:{my:>6.2f}  Z:{mz:>6.2f}")
+            print("-" * 55)
+            
+            print(f"ENVIRONMENT & POWER:")
+            print(f"  BME: {bme_pres:>7.2f} hPa | {bme_hum:>5.2f}% Hum")
+            print(f"  INA: {ina_volt:>7.2f} mV  | {ina_curr:>7.2f} mA | {ina_pwr:>5.2f} W")
+            print(f"  MPL: {mpl:>7.2f} ft")            
+            print("-" * 55)
+            
+            # Helper to colorize status
+            def ok(val): return "\033[92mOK\033[0m" if val else "\033[91mFAIL\033[0m"
+            
+            print(f"SENSOR STATUS:")
+            print(f"  BME280: {ok(stat_bme)} | INA219: {ok(stat_ina)} | IMU: {ok(stat_imu)}")
+            print(f"  TEMPS:  {ok(stat_temp)} | MPL:    {ok(stat_mpl)}")
+            print("=" * 55)
+
         except Exception as e:
             print(f"Display Error: {e}")
 
