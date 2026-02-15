@@ -26,7 +26,8 @@ class TerminalDashboard:
                 bme_temp, bme_pres, bme_hum,     # BME280
                 ina_curr, ina_pwr, ina_volt,     # INA219
                 mpl,
-                stat_bme, stat_ina, stat_imu, stat_temp, stat_mpl # BBBBB (Status Flags)
+                lat, long, alt,
+                stat_bme, stat_ina, stat_imu, stat_temp, stat_mpl, stat_gps # BBBBB (Status Flags)
             ) = data_packet
 
             self.clear_screen()
@@ -52,7 +53,8 @@ class TerminalDashboard:
             print(f"ENVIRONMENT & POWER:")
             print(f"  BME: {bme_pres:>7.2f} hPa | {bme_hum:>5.2f}% Hum")
             print(f"  INA: {ina_volt:>7.2f} mV  | {ina_curr:>7.2f} mA | {ina_pwr:>5.2f} W")
-            print(f"  MPL: {mpl:>7.2f} ft")            
+            print(f"  MPL: {mpl:>7.2f} ft")
+            print(f"  GPS: {lat:>7.2f} deg  | {long:>7.2f} deg | {alt:>5.2f} m")
             print("-" * 55)
             
             # Helper to colorize status

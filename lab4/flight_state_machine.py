@@ -43,6 +43,7 @@ class FlightStateMachine:
             from helpers.mpl3115a2 import MPL3115A2
             from helpers.led import LEDIndicator
             from helpers.rv8803 import RV8803
+            from helpers.gp3906 import GP3906
 
         except ImportError as e:
             print(f"Error importing hardware libraries: {e}")
@@ -55,16 +56,6 @@ class FlightStateMachine:
             print(e)
         
         self.initialize_sensors()
-    
-    def initialize_sensors():
-        self.camera_init()
-        self.imu_init()
-        self.temp_init()
-        self.bme280_init()
-        self.ina219_init()
-        self.logger_init()
-        self.mpl_init()
-        self.led_init()
 
     def camera_init(self):
         try:
@@ -113,13 +104,33 @@ class FlightStateMachine:
             self.led = LEDIndicator()
         except Exception as e:
             print(e)
+    
+    def gps_init(self):
+        try:
+            self.gps = GP3906
+        except Exception as e:
+            print(e)
+    
+    def initialize_sensors():
+        self.camera_init()
+        self.imu_init()
+        self.temp_init()
+        self.bme280_init()
+        self.ina219_init()
+        self.logger_init()
+        self.mpl_init()
+        self.led_init()
+        self.gps_init()
 
     def handle_time_sync(self):
         self.curr_time = time.time()
-        if self.rtc.connected:
-            if self.rtc.read_data() != self.curr_time:
-                self.rtc.sync_system_clock()
-                self.curr_time = time.time()
+        try:
+            if self.rtc.connected:
+                if self.rtc.read_data() != self.curr_time:
+                    self.rtc.sync_system_clock()
+                    self.curr_time = time.time()
+        except Exception as e:
+            print(e)
 
     def handle_photos(self):
         if self.curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
@@ -170,18 +181,20 @@ class FlightStateMachine:
                     bme_data = self.bme280.get_data()
                     ina_data = self.ina219.read_data()
                     mpl_data = self.mpl.read_data()
+                    gps_data = self.gps.read_data()
 
                     # Get status of each  
                     bme280_status = 1 if self.bme280.connected else 0
                     ina219_status = 1 if self.ina219.connected else 0
                     imu_status = 1 if self.imu.connected else 0
                     temp_status = 1 if self.temp.connected else 0
-                    mpl_status = 1 if self.temp.connected else 0
+                    mpl_status = 1 if self.mpl.connected else 0
+                    gps_status = 1 if self.gps.connected else 0
 
                     # Pack for CCSDS (Converts to binary fomat for efficient logging)
                     # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
                     payload = struct.pack(
-                        ">Iffff fff fff fff fff fff f BBBBB", 
+                        ">Iffff fff fff fff fff fff fff f BBBBBB", 
                         int(self.curr_time), 
                         *t_data, 
                         *accel, 
@@ -190,11 +203,13 @@ class FlightStateMachine:
                         *bme_data, 
                         *ina_data, 
                         mpl_data,
+                        gps_data,
                         bme280_status, 
                         ina219_status, 
                         imu_status, 
                         temp_status,
-                        mpl_status
+                        mpl_status,
+                        gps_status
                         )
                     
                     # Log the data in data folder with CCSDS format (Binary)
@@ -203,8 +218,9 @@ class FlightStateMachine:
                 # Camera Logic (pass if not connecyed)
                 if not self.camera_connected: continue
 
+                # CHOOSE ONLY ONE OF THESE AND CHANGE MODE IN INIT
                 # self.handle_photos()
-                self.handle_video_recording()  
+                # self.handle_video_recording()  
 
                 # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
 
