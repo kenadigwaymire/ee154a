@@ -27,7 +27,7 @@ class TerminalDashboard:
                 ina_curr, ina_pwr, ina_volt,     # INA219
                 mpl,
                 lat, long, alt,
-                stat_bme, stat_ina, stat_imu, stat_temp, stat_mpl, stat_gps # BBBBB (Status Flags)
+                stat_bme, stat_ina, stat_imu, stat_temp, stat_mpl, stat_gps, stat_rtc # BBBBB (Status Flags)
             ) = data_packet
 
             self.clear_screen()
@@ -63,6 +63,7 @@ class TerminalDashboard:
             print(f"SENSOR STATUS:")
             print(f"  BME280: {ok(stat_bme)} | INA219: {ok(stat_ina)} | IMU: {ok(stat_imu)}")
             print(f"  TEMPS:  {ok(stat_temp)} | MPL:    {ok(stat_mpl)} | GPS:    {ok(stat_gps)}")
+            print(f"  RTC:  {ok(stat_rtc)}")
             print("=" * 55)
 
         except Exception as e:
@@ -70,7 +71,7 @@ class TerminalDashboard:
 
 class GroundStation:
     """Handles the data stream and unpacking."""
-    PAYLOAD_FORMAT = ">Iffff fff fff fff fff fff fff f BBBBBB"
+    PAYLOAD_FORMAT = ">Iffff fff fff fff fff fff fff f BBBBBBB"
 
     def __init__(self, simulate=False):
         self.data_folder = "simulated-data" if simulate else "data"

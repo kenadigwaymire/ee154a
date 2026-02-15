@@ -163,6 +163,11 @@ class FlightStateMachine:
 
         self.loop_start = self.curr_time
 
+        if self.rtc:
+            rtc_status = 1 if self.rtc.connected else 0
+        else:
+            rtc_status = 0
+
         if self.imu:
             accel, gyro, mag = self.imu.get_data()
             imu_status = 1 if self.imu.connected else 0
@@ -208,7 +213,7 @@ class FlightStateMachine:
         # Pack for CCSDS (Converts to binary fomat for efficient logging)
         # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
         payload = struct.pack(
-            ">Iffff fff fff fff fff fff fff f BBBBBB", 
+            ">Iffff fff fff fff fff fff fff f BBBBBBB", 
             int(self.curr_time), 
             *t_data, 
             *accel, 
@@ -223,7 +228,8 @@ class FlightStateMachine:
             imu_status, 
             temp_status,
             mpl_status,
-            gps_status
+            gps_status,
+            rtc_status
             )
         
         # Log the data in data folder with CCSDS format (Binary)
