@@ -48,7 +48,7 @@ class RV8803:
         
         try:
             self.rtc.update_time()
-            return self.rtc.string_time_8601()
+            return self.rtc.string_time_8601().replace('T', ' ')
         
         except Exception as e:
             print(f'RV8803 read error: {e}')
@@ -56,29 +56,30 @@ class RV8803:
 
     
     def sync_system_clock(self):
-        """Read time from RTC and update the Raspberry Pi OS system time."""
+        nan = float('nan')
+
         if not self.connected:
             print("RTC not connected. Cannot sync system clock.")
-            return
+            return nan
 
-        # 1. Update the local rtc object with the hardware registers
-        if self.rtc.update_time():
-            # Get the string (Format: "MM/DD/YYYY HH:MM:SS")
-            rtc_time_str = self.rtc.string_date_time
-            
-            print(f"Syncing System Clock to RTC: {rtc_time_str}")
-            
-            try:
-                # 2. Use subprocess to run the Linux 'date' command
-                # Format for date command: "YYYY-MM-DD HH:MM:SS"
-                # The RTC string is often "MM/DD/YYYY", so we may need to format it
-                subprocess.run(['sudo', 'date', '-s', rtc_time_str], check=True)
-                
-                # 3. Optional: Sync the hardware clock to the system (if needed)
-                # subprocess.run(['sudo', 'hwclock', '-w'], check=True)
-                
-                print("System clock updated successfully.")
-            except subprocess.CalledProcessError as e:
-                print(f"Failed to update system clock: {e}")
-        else:
-            print("Failed to read time from RV8803 hardware.")
+        try:
+            self.rtc.update_time()
+
+            rtc_iso = self.rtc.string_time_8601().replace('T', ' ')
+
+            if not rtc_iso or rtc_iso != rtc_iso:
+                print("RV8803 read error: got invalid time string.")
+                return nan
+
+            rtc_for_date = rtc_iso.replace('T', ' ').split('.')[0]
+
+            print(f"Syncing System Clock to RTC: {rtc_for_date}")
+
+            #subprocess.run(['sudo', 'date', '-s', rtc_for_date], check=True)
+
+            print("System clock updated successfully.")
+            return rtc_iso
+
+        except Exception as e:
+            print(f"RV8803 read error: {e}")
+            return nan
