@@ -73,42 +73,49 @@ class FlightStateMachine:
         try:
             self.imu = IMUSensor()
         except Exception as e:
+            self.imu = None
             print(e)
 
     def temp_init(self):
         try:
             self.temp = TempSensor()
         except Exception as e:
+            self.temp = None
             print(e)
 
     def bme280_init(self):
         try:
             self.bme280 = BME280Sensor()
         except Exception as e:
+            self.bme280 = None
             print(e)
 
     def ina_init(self):
         try:
             self.ina219 = INA219Sensor()
         except Exception as e:
+            self.ina219 = None
             print(e)
 
     def mpl_init(self):
         try:
             self.mpl = MPL3115A2()
         except Exception as e:
+            self.mpl = None
             print(e)
             
     def led_init(self):
         try:
             self.led = LEDIndicator()
         except Exception as e:
+            self.led = None
             print(e)
     
     def gps_init(self):
         try:
             self.gps = GP3906
         except Exception as e:
+            self.gps = None
             print(e)
     
     def initialize_sensors():
@@ -160,6 +167,7 @@ class FlightStateMachine:
     def run(self):
         """The main mission loop."""
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
+        nan = float('nan')
         try:
             self.led.on()
             while True:
@@ -176,12 +184,30 @@ class FlightStateMachine:
                     self.loop_start = self.curr_time
 
                     # Collect sensor data
-                    accel, gyro, mag = self.imu.get_data()
-                    t_data = self.temp.get_all_temps()
-                    bme_data = self.bme280.get_data()
-                    ina_data = self.ina219.read_data()
-                    mpl_data = self.mpl.read_data()
-                    gps_data = self.gps.read_data()
+                    if self.imu:
+                        accel, gyro, mag = self.imu.get_data()
+                    else:
+                        accel, gyro, mag = nan, nan, nan
+                    if self.temp:
+                        t_data = self.temp.get_all_temps()
+                    else:
+                        t_data = nan, nan, nan, nan
+                    if self.bme280:
+                        bme_data = self.bme280.get_data()
+                    else:
+                        bme_data = nan, nan, nan
+                    if self.ina219:
+                        ina_data = self.ina219.read_data()
+                    else:
+                        ina_data = nan, nan, nan
+                    if self.mpl:
+                        mpl_data = self.mpl.read_data()
+                    else:
+                        mpl_data = nan
+                    if self.gps:
+                        gps_data = self.gps.read_data()
+                    else:
+                        gps_data = nan, nan, nan
 
                     # Get status of each  
                     bme280_status = 1 if self.bme280.connected else 0
