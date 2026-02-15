@@ -35,11 +35,11 @@ class TerminalDashboard:
             print("=" * 55)
             print(f" {self.mission_name} - LIVE TELEMETRY")
             print("=" * 55)
-            print(f"TIME: {int(ts)} | UPTIME: {int(uptime)}s | MODE: {'UTC' if is_utc else 'LOC'}")
+            print(f"TIME: {int(ts)} | UPTIME: {int(uptime)}s")
             print("-" * 55)
             
             print(f"TEMPERATURES (°C):")
-            print(f"  T1:{t1:>5.1f} T2:{t2:>5.1f} T3:{t3:>5.1f} T4:{t4:>5.1f} T5:{t5:>5.1f}")
+            print(f"  T1:{t1:>5.1f} T2:{t2:>5.1f} T3:{t3:>5.1f} T4:{t4:>5.1f}")
             print(f"  BME Temp: {bme_temp:.2f}°C")
             print("-" * 55)
             

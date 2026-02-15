@@ -34,12 +34,12 @@ class TempSensor:
         return 1/inv_t - 273.15
 
     def get_all_temps(self):
-        """Reads ADCs and returns a list of 5 temperatures."""
+        """Reads ADCs and returns a list of 4 temperatures."""
         
         # return nan if sensors all disconnected
         nan = float('nan')
         if not self.connected:
-            return [nan] * 5
+            return [nan] * 4
         try:
             f1 = self.ads1.toVoltage()
             
@@ -73,7 +73,7 @@ class TempSensor:
             return temps
         except Exception as e:
             print(f"[TempSensor Data Error]: {e}")
-            return [nan] * 5
+            return [nan] * 4
 
     # def set_led_alert(self, state):
     #     """Toggles the GPIO pin based on threshold logic."""

@@ -36,15 +36,24 @@ class FlightStateMachine:
             print(f"Error importing hardware libraries: {e}")
             print("Make sure you're running this on a Raspberry Pi with the required libraries installed.")
             sys.exit(1)
-        
+
+        try:
+            self.camera = HQCameraRecorder()
+            self.camera.setup_camera(mode=self.camera_mode)
+            self.camera_connected = True
+            print("Camera initialized successfully.")
+        except Exception as e:
+            self.camera_connected = False
+            self.camera = None # Set to None so we don't try to call methods on it
+            print(f"\n[WARNING] Camera not found or unplugged: {e}")
+            print("Mission will continue without imaging.")
+
         try:
             # Initialize Hardware
             self.imu = IMUSensor()
             self.temp = TempSensor()
             self.bme280 = BME280Sensor()
             self.ina219 = INA219Sensor()
-            self.camera = HQCameraRecorder()
-            self.camera.setup_camera(mode=self.camera_mode)  # Initialize camera in still mode TODO add video mode later
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
             self.mpl = MPL3115A2()
 
@@ -101,6 +110,9 @@ class FlightStateMachine:
                     
                     # Log the data in data folder with CCSDS format (Binary)
                     self.logger.write(payload)
+
+                # Camera Logic (pass if not connecyed)
+                if not self.camera_connected: continue
 
                 # # Photo Logic
                 # if curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
