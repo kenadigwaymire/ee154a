@@ -57,13 +57,14 @@ class FlightStateMachine:
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
         try:
             while True:
+                curr_time = time.time()
                 # Precise Timing
-                elapsed = time.time() - self.loop_start
+                elapsed = current_time - self.loop_start
                 wait_time = (1.0 / self.sample_rate) - elapsed
                 if wait_time > 0: 
                     continue
                 else:
-                    self.loop_start = time.time()
+                    self.loop_start = current_time
 
                     # Collect sensor data
                     accel, gyro, mag = self.imu.get_data()
@@ -78,13 +79,12 @@ class FlightStateMachine:
                     temp_status = 1 if self.temp.connected else 0
     
                     # Timestamp Logic
-                    current_time = time.time()
-                    is_utc = 1 if self.is_utc_valid else 0 #TODO, look at this for realtime clock logic, this is just a placeholder
+                    # is_utc = 1 if self.is_utc_valid else 0 #TODO, look at this for realtime clock logic, this is just a placeholder
 
                     # Pack for CCSDS (Converts to binary fomat for efficient logging)
                     # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
-                    payload = struct.pack(">Ifffff fff fff fff fff fff BBBBB", 
-                        int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, is_utc, bme280_status, ina219_status, imu_status, temp_status)
+                    payload = struct.pack(">Ifffff fff fff fff fff fff BBBB", 
+                        int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, bme280_status, ina219_status, imu_status, temp_status)
                     
                     # Log the data in data folder with CCSDS format (Binary)
                     self.logger.write(payload)
