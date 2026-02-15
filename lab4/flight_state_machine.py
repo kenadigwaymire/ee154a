@@ -18,18 +18,18 @@ class FlightStateMachine:
     REASONING: Controls the "Mission Loop." 
     """
     def __init__(self, sample_rate=10):
-        curr_time = time.time()
+        self.curr_time = time.time()
         self.sample_rate = sample_rate  # Hz
-        self.start_time = curr_time   # For uptime calculations
+        self.start_time = self.curr_time   # For uptime calculations
         self.camera_rate = 1/60       
-        self.last_photo_time = curr_time - (1.0 / self.camera_rate) 
-        self.loop_start = curr_time - (1.0 / self.sample_rate)   
+        self.last_photo_time = self.curr_time - (1.0 / self.camera_rate) 
+        self.loop_start = self.curr_time - (1.0 / self.sample_rate)   
         self.video_duration = 10 # sec 
         self.video_active = False
-        self.last_video_time = curr_time
+        self.last_video_time = self.curr_time
         self.camera_mode  = "video"
         self.led_flash_dur = 1.0 # sec
-        self.last_led_flash = curr_time
+        self.last_led_flash = self.curr_time
         data_folder = "data"
         
         # hardware imports
@@ -42,12 +42,31 @@ class FlightStateMachine:
             from helpers.camera import HQCameraRecorder
             from helpers.mpl3115a2 import MPL3115A2
             from helpers.led import LEDIndicator
+            from helpers.rv8803 import RV8803
 
         except ImportError as e:
             print(f"Error importing hardware libraries: {e}")
             print("Make sure you're running this on a Raspberry Pi with the required libraries installed.")
             sys.exit(1)
 
+        try:
+            self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
+        except Exception as e:
+            print(e)
+        
+        self.initialize_sensors()
+    
+    def initialize_sensors():
+        self.camera_init()
+        self.imu_init()
+        self.temp_init()
+        self.bme280_init()
+        self.ina219_init()
+        self.logger_init()
+        self.mpl_init()
+        self.led_init()
+
+    def camera_init(self):
         try:
             self.camera = HQCameraRecorder()
             self.camera.setup_camera(mode=self.camera_mode)
@@ -58,21 +77,74 @@ class FlightStateMachine:
             self.camera = None # Set to None so we don't try to call methods on it
             print(f"\n[WARNING] Camera not found or unplugged: {e}")
             print("Mission will continue without imaging.")
-
+    
+    def imu_init(self):
         try:
-            # Initialize Hardware
             self.imu = IMUSensor()
-            self.temp = TempSensor()
-            self.bme280 = BME280Sensor()
-            self.ina219 = INA219Sensor()
-            self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
-            self.mpl = MPL3115A2()
-            self.led = LEDIndicator()
-
-        # Handle initialization errors
         except Exception as e:
-            print(f"\nError Initializing Hardware: {e}")
-            sys.exit(1) # Stop the script so it doesn't just 'vanish'
+            print(e)
+
+    def temp_init(self):
+        try:
+            self.temp = TempSensor()
+        except Exception as e:
+            print(e)
+
+    def bme280_init(self):
+        try:
+            self.bme280 = BME280Sensor()
+        except Exception as e:
+            print(e)
+
+    def ina_init(self):
+        try:
+            self.ina219 = INA219Sensor()
+        except Exception as e:
+            print(e)
+
+    def mpl_init(self):
+        try:
+            self.mpl = MPL3115A2()
+        except Exception as e:
+            print(e)
+            
+    def led_init(self):
+        try:
+            self.led = LEDIndicator()
+        except Exception as e:
+            print(e)
+
+    def handle_time_sync(self):
+        self.curr_time = time.time()
+        if self.rtc.connected:
+            if self.rtc.read_data() != self.curr_time:
+                self.rtc.sync_system_clock()
+                self.curr_time = time.time()
+
+    def handle_photos(self):
+        if self.curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
+            try:
+                # Take pictures at every interval
+                self.camera.take_picture(f"frame_{int(time.time())}.jpg")
+            except Exception as e:
+                print(f"Error capturing camera frame: {e}")
+            self.last_photo_time = time.time()
+
+    def handle_video_recording(self):
+        if not self.video_active:
+            try:
+                self.camera.start_video(f"video_{int(time.time())}.h264")
+                self.video_active = True
+                self.last_video_time = time.time()
+            except Exception as e:
+                print(f"Failed to start video: {e}")
+        else:
+            if self.curr_time - self.last_video_time >= self.video_duration:
+                try:
+                    self.camera.stop_video()
+                    self.video_active = False
+                except Exception as e:
+                    print(f"Failed to stop video: {e}")
 
     def run(self):
         """The main mission loop."""
@@ -80,17 +152,17 @@ class FlightStateMachine:
         try:
             self.led.on()
             while True:
-                curr_time = time.time()
-                elapsed = curr_time - self.loop_start
+                self.handle_time_sync()
+
+                # Define loop time to ensure measurement at specified Hz
+                elapsed = self.curr_time - self.loop_start
                 wait_time = (1.0 / self.sample_rate) - elapsed
                 if wait_time > 0: 
                     continue
+
+                # Gather data at specified Hz
                 else:
-                    self.loop_start = curr_time
-                    # # Flash LED Example
-                    # if curr_time - self.last_led_flash >= self.led_flash_dur:
-                    #     self.led.toggle()
-                    #     self.last_led_flash = curr_time
+                    self.loop_start = self.curr_time
 
                     # Collect sensor data
                     accel, gyro, mag = self.imu.get_data()
@@ -110,7 +182,7 @@ class FlightStateMachine:
                     # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
                     payload = struct.pack(
                         ">Iffff fff fff fff fff fff f BBBBB", 
-                        int(curr_time), 
+                        int(self.curr_time), 
                         *t_data, 
                         *accel, 
                         *gyro, 
@@ -131,30 +203,8 @@ class FlightStateMachine:
                 # Camera Logic (pass if not connecyed)
                 if not self.camera_connected: continue
 
-                # # Photo Logic
-                # if curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
-                #     try:
-                #         # Take pictures at every interval
-                #         self.camera.take_picture(f"frame_{int(time.time())}.jpg")
-                #     except Exception as e:
-                #         print(f"Error capturing camera frame: {e}")
-                #     self.last_photo_time = time.time()
-
-                # # Video Logic
-                # if not self.video_active:
-                #     try:
-                #         self.camera.start_video(f"video_{int(time.time())}.h264")
-                #         self.video_active = True
-                #         self.last_video_time = time.time()
-                #     except Exception as e:
-                #         print(f"Failed to start video: {e}")
-                # else:
-                #     if curr_time - self.last_video_time >= self.video_duration:
-                #         try:
-                #             self.camera.stop_video()
-                #             self.video_active = False
-                #         except Exception as e:
-                #             print(f"Failed to stop video: {e}")
+                # self.handle_photos()
+                self.handle_video_recording()  
 
                 # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
 
