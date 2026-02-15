@@ -26,7 +26,7 @@ class RV8803:
     def set_time(self):
 
         if self.connected:
-            print(f'Why the fuck aren't you doing anything dumbass)
+            print('Why the fuck arent you doing anything dumbass')
 
         curr_time = datetime.now()
         weekday = curr_time.isoweekday()
