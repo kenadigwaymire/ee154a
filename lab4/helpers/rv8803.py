@@ -61,7 +61,7 @@ class RV8803:
         
         try:
             self.rtc.update_time()
-            return self.rtc.string_time_8601().replace('T', ' ')
+            return self.rtc.get_epoch()
         
         except Exception as e:
             print(f'RV8803 read error: {e}')
@@ -86,11 +86,11 @@ class RV8803:
 
             rtc_for_date = rtc_iso.replace('T', ' ').split('.')[0]
 
-            print(f"Syncing System Clock to RTC: {rtc_for_date}")
+            #print(f"Syncing System Clock to RTC: {rtc_for_date}")
 
-            #subprocess.run(['sudo', 'date', '-s', rtc_for_date], check=True)
+            subprocess.run(['sudo', 'date', '-s', rtc_for_date], check=True)
 
-            print("System clock updated successfully.")
+            #print("System clock updated successfully.")
             return rtc_iso
 
         except Exception as e:
