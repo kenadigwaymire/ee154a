@@ -84,7 +84,7 @@ class GroundStation:
                 files = sorted(glob.glob(os.path.join(self.data_folder, "*.ccsds")))
                 
                 if not files:
-                    self.dash.display_message("NO DATA DETECTED - Waiting...")
+                    print("NO DATA DETECTED - Waiting...")
                     time.sleep(1)
                     continue
 
