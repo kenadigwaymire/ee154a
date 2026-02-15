@@ -137,6 +137,7 @@ class FlightStateMachine:
                     self.curr_time = time.time()
         except Exception as e:
             print(e)
+
     def handle_data_collection(self):
         nan = float('nan')
         self.loop_start = self.curr_time
@@ -144,36 +145,41 @@ class FlightStateMachine:
         # Collect sensor data
         if self.imu:
             accel, gyro, mag = self.imu.get_data()
+            imu_status = 1 if self.imu.connected else 0
         else:
             accel, gyro, mag = nan, nan, nan
+            imu_status = 0
         if self.temp:
             t_data = self.temp.get_all_temps()
+            temp_status = 1 if self.temp.connected else 0
         else:
             t_data = nan, nan, nan, nan
+            temp_status = 0
         if self.bme280:
             bme_data = self.bme280.get_data()
+            bme280_status = 1 if self.bme280.connected else 0
         else:
             bme_data = nan, nan, nan
+            bme280_status = 0
+
         if self.ina219:
             ina_data = self.ina219.read_data()
+            ina219_status = 1 if self.ina219.connected else 0
         else:
             ina_data = nan, nan, nan
+            ina219_status = 0
         if self.mpl:
             mpl_data = self.mpl.read_data()
+            mpl_status = 1 if self.mpl.connected else 0
         else:
             mpl_data = nan
+            mpl_status = 0
         if self.gps:
             gps_data = self.gps.read_data()
+            gps_status = 1 if self.gps.connected else 0
         else:
             gps_data = nan, nan, nan
-
-        # Get status of each  
-        bme280_status = 1 if self.bme280.connected else 0
-        ina219_status = 1 if self.ina219.connected else 0
-        imu_status = 1 if self.imu.connected else 0
-        temp_status = 1 if self.temp.connected else 0
-        mpl_status = 1 if self.mpl.connected else 0
-        gps_status = 1 if self.gps.connected else 0
+            gps_status = 0
 
         # Pack for CCSDS (Converts to binary fomat for efficient logging)
         # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
@@ -198,6 +204,7 @@ class FlightStateMachine:
         
         # Log the data in data folder with CCSDS format (Binary)
         self.logger.write(payload)
+
     def handle_photos(self):
         if self.curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
             try:
