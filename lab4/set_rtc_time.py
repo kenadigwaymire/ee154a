@@ -4,5 +4,5 @@ def main():
     rtc = RV8803()
     rtc.set_time()
 
-if __name__ == 'main':
+if __name__ == '__main__':
     main()
