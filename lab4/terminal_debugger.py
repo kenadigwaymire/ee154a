@@ -51,7 +51,7 @@ class TerminalDashboard:
 
 class GroundStation:
     """Handles the data stream and unpacking."""
-    PAYLOAD_FORMAT = ">Ifffff fff fff fff fff fff B"
+    PAYLOAD_FORMAT = ">Ifffff fff fff fff fff fff BBBBB"
 
     def __init__(self, simulate=False):
         self.data_folder = "simulated-data" if simulate else "data"
@@ -63,36 +63,48 @@ class GroundStation:
         
         try:
             while True:
-                # Check if folder exists or has files
-                files = glob.glob(os.path.join(self.data_folder, "*.ccsds"))
+                # 1. Always look for the LATEST file (sorted by name/time)
+                files = sorted(glob.glob(os.path.join(self.data_folder, "*.ccsds")))
                 
                 if not files:
-                    self.dash.display_message("NO DATA DETECTED - Waiting for Mission Start...")
-                    time.sleep(2)
+                    self.dash.display_message("NO DATA DETECTED - Waiting...")
+                    time.sleep(1)
                     continue
 
-                # Stream the files
-                found_valid_packet = False
-                for packet_dict in self.reader.stream_all_files():
-                    found_valid_packet = True
-                    raw_payload = packet_dict["payload"]
-                    
-                    try:
-                        unpacked_data = struct.unpack(self.PAYLOAD_FORMAT, raw_payload)
-                        self.dash.display(unpacked_data)
-                        time.sleep(0.1) # Refresh rate
-                    except struct.error:
-                        # Don't crash on one bad packet, just skip it
-                        continue
+                latest_file = files[-1] # Grab the newest file
                 
-                if not found_valid_packet:
-                    self.dash.display_message("INVALID DATA - Files found but packets are unreadable.")
-                    time.sleep(2)
+                # 2. Open the file and jump to the end
+                with open(latest_file, "rb") as f:
+                    file_size = os.path.getsize(latest_file)
+                    
+                    if file_size < 6: # File is empty or just started
+                        time.sleep(0.5)
+                        continue
 
+                    # We want the LAST packet. 
+                    # A safe bet is to look at the last 1024 bytes to find a header
+                    # Or, more simply, we use your reader's specific file logic
+                    packets = list(self.reader.stream_specific_file(latest_file))
+                    
+                    if packets:
+                        latest_packet = packets[-1] # The last entry in the list
+                        raw_payload = latest_packet["payload"]
+                        
+                        try:
+                            unpacked_data = struct.unpack(self.PAYLOAD_FORMAT, raw_payload)
+                            self.dash.display(unpacked_data)
+                        except struct.error as e:
+                            # Skip if the very last packet was partially written
+                            continue
+                
+                # High refresh for a "live" feel
+                time.sleep(0.2) 
+
+        except Exception as e:
+            print(f"Failed: {e}")
         except KeyboardInterrupt:
             print("\n[GS] Ground Station Offline.")
 
 if __name__ == "__main__":
-    is_sim = "--simulate" in sys.argv
-    gs = GroundStation(simulate=is_sim)
+    gs = GroundStation()
     gs.run()

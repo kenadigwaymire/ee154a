@@ -98,21 +98,21 @@ class FlightStateMachine:
                 #         print(f"Error capturing camera frame: {e}")
                 #     self.last_photo_time = time.time()
 
-                # Video Logic
-                if not self.video_active:
-                    try:
-                        self.camera.start_video(f"video_{int(time.time())}.h264")
-                        self.video_active = True
-                        self.last_video_time = time.time()
-                    except Exception as e:
-                        print(f"Failed to start video: {e}")
-                else:
-                    if time.time() - self.last_video_time >= self.video_duration:
-                        try:
-                            self.camera.stop_video()
-                            self.video_active = False
-                        except Exception as e:
-                            print(f"Failed to stop video: {e}")
+                # # Video Logic
+                # if not self.video_active:
+                #     try:
+                #         self.camera.start_video(f"video_{int(time.time())}.h264")
+                #         self.video_active = True
+                #         self.last_video_time = time.time()
+                #     except Exception as e:
+                #         print(f"Failed to start video: {e}")
+                # else:
+                #     if time.time() - self.last_video_time >= self.video_duration:
+                #         try:
+                #             self.camera.stop_video()
+                #             self.video_active = False
+                #         except Exception as e:
+                #             print(f"Failed to stop video: {e}")
 
                 # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
 

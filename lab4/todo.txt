@@ -1,8 +1,0 @@
-Need to add watchdog timer on the pi to restart if script fails
-Need to add script path & venv to run on pi startup
-Need to add more sensor debugging (bad values, sensro unplugs)
-Add monitor to debug termninal to show sensor bad
-Update debug terminal to read current data 
-Add logic for new sensors (geiger counter)
-Add logic for video
-Decide on resolution for camera
