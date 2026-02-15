@@ -62,7 +62,7 @@ class TerminalDashboard:
             
             print(f"SENSOR STATUS:")
             print(f"  BME280: {ok(stat_bme)} | INA219: {ok(stat_ina)} | IMU: {ok(stat_imu)}")
-            print(f"  TEMPS:  {ok(stat_temp)} | MPL:    {ok(stat_mpl)}")
+            print(f"  TEMPS:  {ok(stat_temp)} | MPL:    {ok(stat_mpl)} | GPS:    {ok(stat_gps)}")
             print("=" * 55)
 
         except Exception as e:
@@ -70,7 +70,7 @@ class TerminalDashboard:
 
 class GroundStation:
     """Handles the data stream and unpacking."""
-    PAYLOAD_FORMAT = ">Ifffff fff fff fff fff fff BBBBB"
+    PAYLOAD_FORMAT = ">Iffff fff fff fff fff fff fff f BBBBBB"
 
     def __init__(self, simulate=False):
         self.data_folder = "simulated-data" if simulate else "data"
