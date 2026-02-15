@@ -8,7 +8,7 @@ class TempSensor:
     """
     def __init__(self, gpio_pin=15):
         try:
-            self.ads1 = ADS1x15.ADS1115(1, 0x49)
+            self.ads1 = ADS1x15.ADS1115(1, 0x48)
             self.gpio_pin = gpio_pin
             
             # Steinhart-Hart Coefficients
