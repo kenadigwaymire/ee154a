@@ -113,9 +113,16 @@ class FlightStateMachine:
     
     def gps_init(self):
         try:
-            self.gps = GP3906
+            self.gps = GP3906()
         except Exception as e:
             self.gps = None
+            print(e)
+
+    def rtc_init(self):
+        try:
+            self.rtc = RV8803()
+        except Exception as e:
+            self.rtc = None
             print(e)
     
     def initialize_sensors(self):
@@ -127,6 +134,7 @@ class FlightStateMachine:
         self.mpl_init()
         self.led_init()
         self.gps_init()
+        self.rtc_init()
 
     def handle_time_sync(self):
         self.curr_time = time.time()
