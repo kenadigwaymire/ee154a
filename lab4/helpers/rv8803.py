@@ -25,16 +25,16 @@ class RV8803:
 
     def set_time(self):
 
+        if self.connected:
+            print(f'Why the fuck aren't you doing anything dumbass)
+
         curr_time = datetime.now()
         weekday = curr_time.isoweekday()
 
         print(f'Syncing RTC to {curr_time.strftime('%Y-%m-%d %H:%M:%S')}')
         
-        success = self.rtc.set_time(curr_time.second, curr_time.minute, curr_time.hour, weekday, curr_time.day, curr_time.month, curr_time.year)
-        if success:
-            print(f'RTC successfully set, time: {self.read_data()}')
-        else:
-            print(f'RTC time sync unsuccessful')
+        self.rtc.set_time(curr_time.second, curr_time.minute, curr_time.hour, weekday, curr_time.day, curr_time.month, curr_time.year)
+        print(f'RTC successfully set, time: {self.read_data()}')
 
     def read_data(self):
         nan = float('nan')
