@@ -15,8 +15,12 @@ class FlightStateMachine:
         self.sample_rate = sample_rate  # Hz
         self.start_time = time.time()   # For uptime calculations
         self.camera_rate = 1/60       
-        self.last_camera_time = time.time() - (1.0 / self.camera_rate) 
-        self.loop_start = time.time() - (1.0 / self.sample_rate)    
+        self.last_photo_time = time.time() - (1.0 / self.camera_rate) 
+        self.loop_start = time.time() - (1.0 / self.sample_rate)   
+        self.video_duration = 5 # sec 
+        self.video_active = False
+        self.last_video_time = time.time()
+        self.camera_mode  = "video"
         data_folder = "data"
         
         # hardware imports
@@ -39,7 +43,7 @@ class FlightStateMachine:
             self.bme280 = BME280Sensor()
             self.ina219 = INA219Sensor()
             self.camera = HQCameraRecorder()
-            self.camera.setup_camera(mode="still")  # Initialize camera in still mode TODO add video mode later
+            self.camera.setup_camera(mode=self.camera_mode)  # Initialize camera in still mode TODO add video mode later
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
             self.is_utc_valid = True  # TODO: In a real mission, you'd check if the RTC is set to UTC time.
 
@@ -56,41 +60,59 @@ class FlightStateMachine:
                 # Precise Timing
                 elapsed = time.time() - self.loop_start
                 wait_time = (1.0 / self.sample_rate) - elapsed
-                if wait_time > 0: continue
+                if wait_time > 0: 
+                    continue
+                else:
+                    self.loop_start = time.time()
 
-                self.loop_start = time.time()
+                    # Collect sensor data
+                    accel, gyro, mag = self.imu.get_data()
+                    t_data = self.temp.get_all_temps()
+                    bme_data = self.bme280.get_data()
+                    ina_data = self.ina219.read_data()
 
-                # Collect sensor data
-                accel, gyro, mag = self.imu.get_data()
-                t_data = self.temp.get_all_temps()
-                bme_data = self.bme280.get_data()
-                ina_data = self.ina219.read_data()
+                    # Get status of each  
+                    bme280_status = 1 if self.bme280.connected else 0
+                    ina219_status = 1 if self.ina219.connected else 0
+                    imu_status = 1 if self.imu.connected else 0
+                    temp_status = 1 if self.temp.connected else 0
+    
+                    # Timestamp Logic
+                    current_time = time.time()
+                    is_utc = 1 if self.is_utc_valid else 0 #TODO, look at this for realtime clock logic, this is just a placeholder
 
-                # Get status of each  
-                bme280_status = 1 if self.bme280.connected else 0
-                ina219_status = 1 if self.ina219.connected else 0
-                imu_status = 1 if self.imu.connected else 0
-                temp_status = 1 if self.temp.connected else 0
-  
-                # Timestamp Logic
-                current_time = time.time()
-                is_utc = 1 if self.is_utc_valid else 0 #TODO, look at this for realtime clock logic, this is just a placeholder
+                    # Pack for CCSDS (Converts to binary fomat for efficient logging)
+                    # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
+                    payload = struct.pack(">Ifffff fff fff fff fff fff BBBBB", 
+                        int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, is_utc, bme280_status, ina219_status, imu_status, temp_status)
+                    
+                    # Log the data in data folder with CCSDS format (Binary)
+                    self.logger.write(payload)
 
-                # Pack for CCSDS (Converts to binary fomat for efficient logging)
-                # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
-                payload = struct.pack(">Ifffff fff fff fff fff fff BBBBB", 
-                    int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, is_utc, bme280_status, ina219_status, imu_status, temp_status)
-                
-                # Log the data in data folder with CCSDS format (Binary)
-                self.logger.write(payload)
+                # # Photo Logic: Capture a photo #TODO add video mode later, this is just a placeholder for now
+                # if time.time() - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
+                #     try:
+                #         # Take pictures at every interval
+                #         self.camera.take_picture(f"frame_{int(time.time())}.jpg")
+                #     except Exception as e:
+                #         print(f"Error capturing camera frame: {e}")
+                #     self.last_photo_time = time.time()
 
-                # Camera Logic: Capture a photo #TODO add video mode later, this is just a placeholder for now
-                if time.time() - self.last_camera_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
+                # Video Logic
+                if not self.video_active:
                     try:
-                        self.camera.take_picture(f"frame_{int(time.time())}.jpg")
+                        self.camera.start_video(f"video_{int(time.time())}.h264")
+                        self.video_active = True
+                        self.last_video_time = time.time()
                     except Exception as e:
-                        print(f"Error capturing camera frame: {e}")
-                    self.last_camera_time = time.time()
+                        print(f"Failed to start video: {e}")
+                else:
+                    if time.time() - self.last_video_time >= self.video_duration:
+                        try:
+                            self.camera.stop_video()
+                            self.video_active = False
+                        except Exception as e:
+                            print(f"Failed to stop video: {e}")
 
                 # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
 

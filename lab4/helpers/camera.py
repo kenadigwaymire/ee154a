@@ -1,7 +1,8 @@
 import time
 import os
 from picamera2 import Picamera2
-
+from picamera2.outputs import FfmpegOutput
+from picamera2.encoders import H264Encoder
 
 class HQCameraRecorder:
     def __init__(self, folder="media"):
@@ -16,17 +17,19 @@ class HQCameraRecorder:
         self.picam2.capture_file(path)
         print("Image saved.")
 
-    # def record_video(self, filename="video.h264", duration_seconds=5):
-    #     path = os.path.join(self.folder, filename)
-    #     print(f"Starting recording: {path}")
+    def start_video(self, filename="video.h264"):
+        path = os.path.join(self.folder, filename)
+        # Bitrate: 10Mbps
+        encoder = H264Encoder(10000000)
+        video_output = FfmpegOutput(path)
         
-    #     # FIX: start_recording requires an output object, not just a string
-    #     from picamera2.outputs import FileOutput
-    #     self.picam2.start_recording(FileOutput(path))
+        print(f"Starting recording: {path}")
+        # Passing encoder and output as explicit arguments fixes the TypeError
+        self.picam2.start_recording(encoder, output=video_output)
         
-    #     time.sleep(duration_seconds)
-    #     self.picam2.stop_recording()
-    #     print("Recording finished.")
+    def stop_video(self):
+        self.picam2.stop_recording()
+        print("Recording finished.")
 
     def setup_camera(self, mode="still"):
         """Configures the camera, ensuring it is stopped first if already running."""
