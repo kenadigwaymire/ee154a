@@ -32,30 +32,25 @@ class HQCameraRecorder:
         self.picam2.stop_recording()
         print("Recording finished.")
 
-    def setup_camera(self, mode="still"):
+    def setup_camera(self, mode="still", fps=60):
         """Configures the camera, ensuring it is stopped first if already running."""
-        
-        # 1. STOP THE CAMERA FIRST
-        # If the camera is already running (from a previous take_picture), 
-        # we must kill the stream before changing settings.
         try:
             self.picam2.stop()
-            print("Stopping stream for reconfiguration...")
         except:
-            # If it wasn't running yet, stop() might throw an error; we just ignore it.
             pass
 
-        # 2. CONFIGURE
         if mode == "video":
-            config = self.picam2.create_video_configuration(main={"size": (640, 480)})
-            print("Camera configured for 480p Video.")
+            # Force the frame rate in the configuration controls
+            config = self.picam2.create_video_configuration(
+                main={"size": (640, 480)},
+                controls={"FrameRate": fps} 
+            )
+            print(f"Camera configured for 480p Video at {fps} FPS.")
         else:
             config = self.picam2.create_still_configuration(main={"size": (640, 480)})
             print("Camera configured for High-Res Still.")
             
         self.picam2.configure(config)
-        
-        # 3. START
         self.picam2.start()
 
     def cleanup(self):
