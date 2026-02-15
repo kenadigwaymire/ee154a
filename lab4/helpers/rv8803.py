@@ -41,47 +41,33 @@ class RV8803:
         print(f'RTC successfully set, time: {self.read_data()}')
 
     def read_data(self):
-        nan = float("nan")
+        nan = float('nan')
+
         if not self.connected:
             return nan
 
         try:
-            # update_time() populates self.rtc._time (BCD values)
             self.rtc.update_time()
 
-            # Decode using the same internal mechanism the library uses for string_date_usa/string_time
-            year_2 = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxYear])   # 0..99
-            month  = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxMonth])  # 1..12
-            day    = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxDate])   # 1..31
-            hour   = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxHours])  # 0..23-ish
-            minute = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxMinutes])# 0..59
-            second = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxSeconds])# 0..59
+            year = 2000 + self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxYear])
+            month = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxMonth])
+            day = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxDate])
+            hour = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxHours])
+            minute = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxMinutes])
+            second = self.rtc.bcd_to_dec(self.rtc._time[self.rtc.kIdxSeconds])
 
-            year = 2000 + year_2
-
-            # Quick validity guard (prevents "day out of range for month")
-            if not (1 <= month <= 12 and 1 <= day <= 31 and 0 <= hour <= 23 and 0 <= minute <= 59 and 0 <= second <= 59):
-                print(f"[RV8803] Invalid fields: Y={year} M={month} D={day} {hour}:{minute}:{second}")
+            # If RTC not initialized (day == 0), return NaN
+            if day == 0 or month == 0:
                 return nan
 
-            try:
-                dt = datetime(year, month, day, hour, minute, second)
-            except ValueError as ve:
-                # This catches cases like April 31, Feb 30, day=0, etc.
-                print(f"[RV8803] Invalid calendar date from RTC: Y={year} M={month} D={day} ({ve})")
-                # Useful debug: show exactly what the library would print
-                try:
-                    print(f"[RV8803] string_date_usa={self.rtc.string_date_usa()} string_time={self.rtc.string_time()}")
-                except Exception:
-                    pass
-                return nan
+            dt = datetime(year, month, day, hour, minute, second)
 
-            # dt.timestamp() uses local timezone; if you want UTC instead, use calendar/timegm.
             return dt.timestamp()
 
         except Exception as e:
-            print(f"RV8803 read error: {e}")
+            print(f'RV8803 read error: {e}')
             return nan
+
 
     
     def sync_system_clock(self):
