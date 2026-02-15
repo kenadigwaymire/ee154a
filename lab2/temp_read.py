@@ -18,8 +18,8 @@ D = 1.65394923419592e-7
 R_VAL = 6800
 VCC = 3.3
 
-ADS1 = ADS1x15.ADS1115(1, 0x49)
-ADS2 = ADS1x15.ADS1115(1, 0x48)
+ADS1 = ADS1x15.ADS1115(1, 0x48)
+#ADS2 = ADS1x15.ADS1115(1, 0x48)
 
 print(os.path.basename(__file__))
 print("ADS1X15_LIB_VERSION: {}".format(ADS1x15.__version__))
@@ -28,8 +28,8 @@ print("ADS1X15_LIB_VERSION: {}".format(ADS1x15.__version__))
 ADS1.setGain(ADS1.PGA_4_096V)
 f1 = ADS1.toVoltage()
 
-ADS2.setGain(ADS2.PGA_4_096V)
-f2 = ADS2.toVoltage()
+'''ADS2.setGain(ADS2.PGA_4_096V)
+f2 = ADS2.toVoltage()'''
 
 def calc_temp(res):
     inv = A + (B * math.log(res)) + (C * (math.log(res))**2) + (D * (math.log(res))**3)
@@ -40,25 +40,25 @@ while True :
     val_1 = ADS1.readADC(1)
     val_2 = ADS1.readADC(2)
     val_3 = ADS1.readADC(3)
-    val_4 = ADS2.readADC(1)
+    #val_4 = ADS2.readADC(1)
 
     v_0 = val_0 * f1
     v_1 = val_1 * f1
     v_2 = val_2 * f1
     v_3 = val_3 * f1
-    v_4 = val_4 * f2
+    #v_4 = val_4 * f2
 
     r_0 = ((R_VAL * VCC) / v_0) - R_VAL
     r_1 = ((R_VAL * VCC) / v_1) - R_VAL
     r_2 = ((R_VAL * VCC) / v_2) - R_VAL
     r_3 = ((R_VAL * VCC) / v_3) - R_VAL
-    r_4 = ((R_VAL * VCC) / v_4) - R_VAL
+    #r_4 = ((R_VAL * VCC) / v_4) - R_VAL
 
     t_0 = calc_temp(r_0)
     t_1 = calc_temp(r_1)
     t_2 = calc_temp(r_2)
     t_3 = calc_temp(r_3)
-    t_4 = calc_temp(r_4)
+    #t_4 = calc_temp(r_4)
 
     '''print("Analog0: {0:d}\t{1:.3f} V".format(val_0, val_0 * f1))
     print("Analog1: {0:d}\t{1:.3f} V".format(val_1, val_1 * f1))
@@ -70,6 +70,6 @@ while True :
     print(f"Analog1: {t_1} C")
     print(f"Analog2: {t_2} C")
     print(f"Analog3: {t_3} C")
-    print(f"Analog4: {t_4} C")
+    #print(f"Analog4: {t_4} C")
 
     time.sleep(1)
