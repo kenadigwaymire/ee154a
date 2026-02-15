@@ -148,7 +148,7 @@ class FlightStateMachine:
 
     def handle_time_sync(self):
         #self.curr_time = time.time()
-        system_time_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        system_time_str = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         try:
             if self.rtc:
                 if self.rtc.connected:
