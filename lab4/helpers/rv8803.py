@@ -25,6 +25,8 @@ class RV8803:
 
     def set_time(self):
 
+        print('dumb')
+
         if self.connected:
             print('Why the fuck arent you doing anything dumbass')
 
