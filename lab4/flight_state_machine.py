@@ -147,12 +147,11 @@ class FlightStateMachine:
         self.rtc_init()
 
     def handle_time_sync(self):
-        #self.curr_time = time.time()
-        system_time_str = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        self.curr_time = time.time()
         try:
             if self.rtc:
                 if self.rtc.connected:
-                    if self.rtc.read_data() != system_time_str:
+                    if self.rtc.read_data() != self.curr_time:
                         self.rtc.sync_system_clock()
                         self.curr_time = time.time()
         except Exception as e:
