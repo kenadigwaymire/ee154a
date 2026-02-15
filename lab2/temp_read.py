@@ -18,7 +18,7 @@ D = 1.65394923419592e-7
 R_VAL = 6800
 VCC = 3.3
 
-ADS1 = ADS1x15.ADS1115(1, 0x48)
+ADS1 = ADS1x15.ADS1115(1, 0x49)
 #ADS2 = ADS1x15.ADS1115(1, 0x48)
 
 print(os.path.basename(__file__))
