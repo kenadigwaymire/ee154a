@@ -48,7 +48,7 @@ class RV8803:
         
         try:
             self.rtc.update_time()
-            return self.rtc.get_epoch()
+            return self.rtc.string_time_8601()
         
         except Exception as e:
             print(f'RV8803 read error: {e}')
