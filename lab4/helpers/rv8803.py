@@ -13,12 +13,11 @@ class RV8803:
     def __init__(self, address=0x32):
         try:
             self.rtc = qwiic_rv8803.QwiicRV8803()
-            if not self.rtc.is_connected:
+            if not self.rtc.begin():
                 print(f'RTC not connected but no exception.')
                 self.connected = False
             else:
                 self.connected = True
-                self.rtc.begin()
         except Exception as e:
             print(f'RTC not connected: {e}')
             self.connected = False
