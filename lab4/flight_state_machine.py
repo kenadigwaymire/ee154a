@@ -31,6 +31,7 @@ class FlightStateMachine:
             from helpers.bme_280 import BME280Sensor
             from helpers.ina219 import INA219Sensor
             from helpers.camera import HQCameraRecorder
+            from helpers.mpl3115a2 import MPL3115A2
         except ImportError as e:
             print(f"Error importing hardware libraries: {e}")
             print("Make sure you're running this on a Raspberry Pi with the required libraries installed.")
@@ -45,7 +46,7 @@ class FlightStateMachine:
             self.camera = HQCameraRecorder()
             self.camera.setup_camera(mode=self.camera_mode)  # Initialize camera in still mode TODO add video mode later
             self.logger = CCSDSWriter(apid=0x123, folder=data_folder)
-            self.is_utc_valid = True  # TODO: In a real mission, you'd check if the RTC is set to UTC time.
+            self.mpl = MPL3115A2()
 
         # Handle initialization errors
         except Exception as e:
@@ -57,40 +58,52 @@ class FlightStateMachine:
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
         try:
             while True:
-                # Precise Timing
-                elapsed = time.time() - self.loop_start
+                curr_time = time.time()
+                elapsed = curr_time - self.loop_start
                 wait_time = (1.0 / self.sample_rate) - elapsed
                 if wait_time > 0: 
                     continue
                 else:
-                    self.loop_start = time.time()
+                    self.loop_start = curr_time
 
                     # Collect sensor data
                     accel, gyro, mag = self.imu.get_data()
                     t_data = self.temp.get_all_temps()
                     bme_data = self.bme280.get_data()
                     ina_data = self.ina219.read_data()
+                    mpl_data = self.mpl.read_data()
 
                     # Get status of each  
                     bme280_status = 1 if self.bme280.connected else 0
                     ina219_status = 1 if self.ina219.connected else 0
                     imu_status = 1 if self.imu.connected else 0
                     temp_status = 1 if self.temp.connected else 0
-    
-                    # Timestamp Logic
-                    current_time = time.time()
-                    is_utc = 1 if self.is_utc_valid else 0 #TODO, look at this for realtime clock logic, this is just a placeholder
+                    mpl_status = 1 if self.temp.connected else 0
 
                     # Pack for CCSDS (Converts to binary fomat for efficient logging)
                     # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
-                    payload = struct.pack(">Ifffff fff fff fff fff fff BBBBB", 
-                        int(current_time), *t_data, *accel, *gyro, *mag, *bme_data, *ina_data, is_utc, bme280_status, ina219_status, imu_status, temp_status)
+                    payload = struct.pack(
+                        ">Iffff fff fff fff fff fff f BBBBB", 
+                        int(curr_time), 
+                        *t_data, 
+                        *accel, 
+                        *gyro, 
+                        *mag, 
+                        *bme_data, 
+                        *ina_data, 
+                        mpl_data,
+                        bme280_status, 
+                        ina219_status, 
+                        imu_status, 
+                        temp_status,
+                        mpl_status
+                        )
                     
                     # Log the data in data folder with CCSDS format (Binary)
                     self.logger.write(payload)
 
-                # # Photo Logic: Capture a photo #TODO add video mode later, this is just a placeholder for now
-                # if time.time() - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
+                # # Photo Logic
+                # if curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
                 #     try:
                 #         # Take pictures at every interval
                 #         self.camera.take_picture(f"frame_{int(time.time())}.jpg")
@@ -107,7 +120,7 @@ class FlightStateMachine:
                 #     except Exception as e:
                 #         print(f"Failed to start video: {e}")
                 # else:
-                #     if time.time() - self.last_video_time >= self.video_duration:
+                #     if curr_time - self.last_video_time >= self.video_duration:
                 #         try:
                 #             self.camera.stop_video()
                 #             self.video_active = False
