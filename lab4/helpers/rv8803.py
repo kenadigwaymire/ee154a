@@ -88,7 +88,7 @@ class RV8803:
 
             #print(f"Syncing System Clock to RTC: {rtc_for_date}")
 
-            subprocess.run(['sudo', 'date', '-s', rtc_for_date], check=True)
+            #subprocess.run(['sudo', 'date', '-s', rtc_for_date], check=True)
 
             #print("System clock updated successfully.")
             return rtc_iso
