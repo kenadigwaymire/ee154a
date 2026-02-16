@@ -185,7 +185,10 @@ class FlightStateMachine:
         if self.rtc:
             try:
                 t = self.rtc.read_data()
-                rtc_status = 1
+                if is_failed(t):
+                    rtc_status = 0
+                else:
+                    rtc_status = 1 
             except Exception:
                 t = nan
                 imu_status = 0
@@ -294,6 +297,8 @@ class FlightStateMachine:
         
         # Log the data in data folder with CCSDS format (Binary)
         self.logger.write(payload)
+
+        self.handle
 
     def handle_photos(self):
         if self.curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
