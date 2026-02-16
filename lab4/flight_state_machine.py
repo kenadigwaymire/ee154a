@@ -222,9 +222,10 @@ class FlightStateMachine:
                     rtc_status = 0
                 else:
                     rtc_status = 1 
-            except Exception:
+            except Exception as e:
                 t = nan
                 imu_status = 0
+                print(f'RTC read error: {e}')
 
         else:
             t = nan
@@ -239,9 +240,11 @@ class FlightStateMachine:
                     imu_status = 0
                 else:
                     imu_status = 1
-            except Exception:
+            except Exception as e:
                 accel, gyro, mag = triple_nan, triple_nan, triple_nan
                 imu_status = 0
+                print(f'IMU read error: {e}')
+                
         else:
             accel, gyro, mag = triple_nan, triple_nan, triple_nan
             imu_status = 0
@@ -251,9 +254,10 @@ class FlightStateMachine:
             try:
                 t_data = self.temp.get_all_temps()
                 temp_status = 0 if is_failed(t_data) else 1
-            except Exception:
+            except Exception as e:
                 t_data = quad_nan
                 temp_status = 0
+                print(f'Temp sensor read error: {e}')
         else:
             t_data = quad_nan
             temp_status = 0
@@ -263,9 +267,10 @@ class FlightStateMachine:
             try:
                 bme_data = self.bme280.get_data()
                 bme280_status = 0 if is_failed(bme_data) else 1
-            except Exception:
+            except Exception as e:
                 bme_data = triple_nan
                 bme280_status = 0
+                print(f'BME 280 read error: {e}')
         else:
             bme_data = triple_nan
             bme280_status = 0
@@ -275,9 +280,10 @@ class FlightStateMachine:
             try:
                 ina_data = self.ina219.read_data()
                 ina219_status = 0 if is_failed(ina_data) else 1
-            except Exception:
+            except Exception as e:
                 ina_data = triple_nan
                 ina219_status = 0
+                print(f'INA 219 read error: {e}')
         else:
             ina_data = triple_nan
             ina219_status = 0
@@ -287,9 +293,10 @@ class FlightStateMachine:
             try:
                 mpl_data = self.mpl.read_data()
                 mpl_status = 0 if is_failed(mpl_data) else 1
-            except Exception:
+            except Exception as e:
                 mpl_data = nan
                 mpl_status = 0
+                print(f'MPL read error: {e}')
         else:
             mpl_data = nan
             mpl_status = 0
@@ -299,9 +306,10 @@ class FlightStateMachine:
             try:
                 gps_data = self.gps.read_data()
                 gps_status = 0 if is_failed(gps_data) else 1
-            except Exception:
+            except Exception as e:
                 gps_data = triple_nan
                 gps_status = 0
+                print(f'GPS read error: {e}')
         else:
             gps_data = triple_nan
             gps_status = 0
