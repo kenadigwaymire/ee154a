@@ -33,6 +33,18 @@ class FlightStateMachine:
         self.led_flash_dur = 1.0 # sec
         self.last_led_flash = self.curr_time
         data_folder = "data"
+
+        self.bme280_status = 0
+        self.ina219_status = 0
+        self.imu_status = 0
+        self.temp_status = 0
+        self.mpl_status = 0
+        self.gps_status = 0
+        self.rtc_status = 0
+        self.led_status = 0
+        self.camera_status = 0
+        self.reinit_dur = 30.0 # seconds
+        self.last_reinit = self.curr_time
         
         # hardware imports
         try:
@@ -137,15 +149,36 @@ class FlightStateMachine:
             print(e)
     
     def initialize_sensors(self):
-        self.camera_init()
-        self.imu_init()
-        self.temp_init()
-        self.bme280_init()
-        self.ina_init()
-        self.mpl_init()
-        self.led_init()
-        self.gps_init()
-        self.rtc_init()
+        if not self.camera_status:
+            self.camera_init()
+            if self.camera: self.camera_status = 1
+
+        if not self.imu_status:
+            self.imu_init()
+            if self.imu: self.imu_status = 1
+
+        if not self.temp_status:
+            self.temp_init()
+            if self.temp: self.temp_status = 1
+
+        if not self.bme280_status:
+            self.bme280_init()
+            if self.bme280: self.bme280_status = 1
+        if not self.ina219_status:
+            self.ina_init()
+            if self.ina219: self.ina219_status = 1
+        if not self.mpl_status:
+            self.mpl_init()
+            if self.mpl: self.mpl_status = 1
+        if not self.led_status:
+            self.led_init()
+            if self.led: self.led_status = 1
+        if not self.gps_status:
+            self.gps_init()
+            if self.gps: self.gps_status = 1
+        if not self.rtc_status:
+            self.rtc_init()
+            if self.rtc: self.rtc_status = 1
 
     def handle_time_sync(self):
         self.curr_time = time.time()
@@ -298,8 +331,20 @@ class FlightStateMachine:
         # Log the data in data folder with CCSDS format (Binary)
         self.logger.write(payload)
 
-        self.handle
+        self.bme280_status = bme280_status
+        self.ina219_status = ina219_status
+        self.imu_status = imu_status
+        self.temp_status = temp_status
+        self.mpl_status = mpl_status
+        self.gps_status = gps_status
+        self.rtc_status = rtc_status
 
+    def handle_reinitialization(self):
+        if self.curr_time - self.last_reinit >= self.reinit_dur:
+            print("\nAttempting sensor reinitialization...")
+            self.initialize_sensors()
+            self.last_reinit = self.curr_time
+        
     def handle_photos(self):
         if self.curr_time - self.last_photo_time >= (1.0 / self.camera_rate): # Capture at defined camera rate
             try:
@@ -343,6 +388,8 @@ class FlightStateMachine:
                 # Gather data at specified Hz
                 else:
                     self.handle_data_collection()
+
+                self.handle_reinitialization()
 
                 # Camera Logic (pass if not connecyed)
                 if not self.camera:
