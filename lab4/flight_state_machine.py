@@ -383,6 +383,7 @@ class FlightStateMachine:
                 elapsed = self.curr_time - self.loop_start
                 wait_time = (1.0 / self.sample_rate) - elapsed
                 if wait_time > 0: 
+                    time.sleep(0.1)
                     continue
 
                 # Gather data at specified Hz
