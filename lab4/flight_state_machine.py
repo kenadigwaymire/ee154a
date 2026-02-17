@@ -316,6 +316,7 @@ class FlightStateMachine:
 
         # Pack for CCSDS (Converts to binary fomat for efficient logging)
         # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
+        print(f"Packing data for CCSDS logging: Time={t}, Temps={t_data}, Accel={accel}, Gyro={gyro}, Mag={mag}, BME={bme_data}, INA={ina_data}, MPL={mpl_data}, GPS={gps_data}, Statuses: RTC={rtc_status}, IMU={imu_status}, Temp={temp_status}, BME280={bme280_status}, INA219={ina219_status}, MPL={mpl_status}, GPS={gps_status}")
         payload = struct.pack(
             ">Iffff fff fff fff fff fff f fff BBBBBBB", 
             int(self.curr_time), 
@@ -337,8 +338,10 @@ class FlightStateMachine:
             )
         
         # Log the data in data folder with CCSDS format (Binary)
+        print(f"Logging data to CCSDS: {len(payload)} bytes")
         self.logger.write(payload)
 
+        print(f"Data collection complete. RTC Status: {rtc_status} | IMU Status: {imu_status} | Temp Status: {temp_status} | BME280 Status: {bme280_status} | INA219 Status: {ina219_status} | MPL Status: {mpl_status} | GPS Status: {gps_status}")
         self.bme280_status = bme280_status
         self.ina219_status = ina219_status
         self.imu_status = imu_status
@@ -401,6 +404,8 @@ class FlightStateMachine:
                 #     self.handle_data_collection()
                 print(f"Collecting data at {self.curr_time:.2f} (Elapsed: {elapsed:.2f}s)")
                 self.handle_data_collection()
+
+                print(f"Data collected. RTC Status: {self.rtc_status} | IMU Status: {self.imu_status} | Temp Status: {self.temp_status} | BME280 Status: {self.bme280_status} | INA219 Status: {self.ina219_status} | MPL Status: {self.mpl_status} | GPS Status: {self.gps_status}")
                 self.handle_reinitialization()
 
                 # Camera Logic (pass if not connecyed)
