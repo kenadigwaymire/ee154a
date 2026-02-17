@@ -317,7 +317,7 @@ class FlightStateMachine:
         # Pack for CCSDS (Converts to binary fomat for efficient logging)
         # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
         payload = struct.pack(
-            ">Iffff fff fff fff fff fff fff f BBBBBBB", 
+            ">Iffff fff fff fff fff fff f fff BBBBBBB", 
             int(self.curr_time), 
             *t_data, 
             *accel, 

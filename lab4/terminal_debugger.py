@@ -71,7 +71,7 @@ class TerminalDashboard:
 
 class GroundStation:
     """Handles the data stream and unpacking."""
-    PAYLOAD_FORMAT = ">Iffff fff fff fff fff fff fff f BBBBBBB"
+    PAYLOAD_FORMAT = ">Iffff fff fff fff fff fff f fff BBBBBBB" # Must match the struct.pack format in flight code
 
     def __init__(self, simulate=False):
         self.data_folder = "simulated-data" if simulate else "data"
