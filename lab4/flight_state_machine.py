@@ -402,14 +402,14 @@ class FlightStateMachine:
                 self.handle_reinitialization()
 
                 # Camera Logic (pass if not connecyed)
-                if not self.camera:
-                    continue
-                if not self.camera_connected: 
-                    continue
+                # if not self.camera:
+                #     continue
+                # if not self.camera_connected: 
+                #     continue
             
-                # CHOOSE ONLY ONE OF THESE AND CHANGE MODE IN INIT
-                # self.handle_photos()
-                self.handle_video_recording()  
+                # # CHOOSE ONLY ONE OF THESE AND CHANGE MODE IN INIT
+                # # self.handle_photos()
+                # self.handle_video_recording()  
 
                 # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
 
