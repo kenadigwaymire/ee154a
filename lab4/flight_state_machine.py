@@ -389,15 +389,17 @@ class FlightStateMachine:
                 # self.handle_time_sync()
 
                 # Define loop time to ensure measurement at specified Hz
-                # elapsed = self.curr_time - self.loop_start
-                # wait_time = (1.0 / self.sample_rate) - elapsed
-                # if wait_time > 0: 
-                #     time.sleep(0.1)
-                #     continue
+                elapsed = self.curr_time - self.loop_start
+                wait_time = (1.0 / self.sample_rate) - elapsed
+                if wait_time > 0: 
+                    time.sleep(0.05)
+                    print(f"Waiting {wait_time:.2f}s to maintain sample rate...")
+                    continue
 
                 # # Gather data at specified Hz
                 # else:
                 #     self.handle_data_collection()
+                print(f"Collecting data at {self.curr_time:.2f} (Elapsed: {elapsed:.2f}s)")
                 self.handle_data_collection()
                 self.handle_reinitialization()
 
