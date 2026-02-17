@@ -8,7 +8,7 @@ from datetime import datetime
 
 # 1. Configuration
 # ts, 5 temps, 3 accel, 3 gyro, 3 mag, 3 bme, 3 ina, is_utc, bme280_status, ina219_status, imu_status, temp_status
-PAYLOAD_FORMAT = ">Ifffff fff fff fff fff fff BBBBB"
+PAYLOAD_FORMAT = ">Iffff fff fff fff fff fff fff f BBBBBBB"
 HEADER_SIZE = 6
 
 def parse_date_arg(date_str):
@@ -25,16 +25,16 @@ def read_mission_data_filtered(folder_path, min_ts=None, max_ts=None):
     """Parses .ccsds files and filters data by timestamp range."""
     data = {
         'time': [],
-        'temps': [[] for _ in range(5)],
+        'temps': [[] for _ in range(4)],
         'accel': [[] for _ in range(3)],
         'gyro':  [[] for _ in range(3)],
         'mag':   [[] for _ in range(3)],
         'bme':   [[] for _ in range(3)],   # [pressure_hPa, humidity_pct, temp_C] (per your bme280.get_data())
         'ina':   [[] for _ in range(3)],   # [voltage, current, power] (per your ina219.read_data())
-        'bme280_status':    [],
-        'ina219_status':    [],
-        'imu_status':       [],
-        'temp_status':      []
+        'mpl':   [],                     # Assuming mpl data is a single value (e.g., pressure)
+        'gps':   [[] for _ in range(3)],                     # Assuming gps data is a single value (e.g., altitude)
+        'statuses': [[] for _ in range(7)]  # [bme280_status, ina219_status, imu_status, temp_status, mpl_status, gps_status, rtc_status]
+
     }
 
     files = sorted(glob.glob(os.path.join(folder_path, "*.ccsds")))
@@ -65,34 +65,19 @@ def read_mission_data_filtered(folder_path, min_ts=None, max_ts=None):
                     if max_ts is not None and ts > max_ts:
                         continue
 
-                    # Layout:
-                    # 0: ts
-                    # 1-5: temps (5)
-                    # 6-8: accel (3)
-                    # 9-11: gyro (3)
-                    # 12-14: mag (3)
-                    # 15-17: bme (3)
-                    # 18-20: ina (3)
-                    # 21: is_utc (B)
                     data['time'].append(ts)
-
-                    for i in range(5):
-                        data['temps'][i].append(d[1 + i])
-
-                    for i in range(3):
-                        data['accel'][i].append(d[6 + i])
-
-                    for i in range(3):
-                        data['gyro'][i].append(d[9 + i])
-
-                    for i in range(3):
-                        data['mag'][i].append(d[12 + i])
-
-                    for i in range(3):
-                        data['bme'][i].append(d[15 + i])
-
-                    for i in range(3):
-                        data['ina'][i].append(d[18 + i])
+                    # 4 Temps: Indices 1-4
+                    for i in range(4): data['temps'][i].append(d[1+i])
+                    # IMU/BME/INA/MPL/GPS (Groups of 3)
+                    for i in range(3): data['accel'][i].append(d[5+i])
+                    for i in range(3): data['gyro'][i].append(d[8+i])
+                    for i in range(3): data['mag'][i].append(d[11+i])
+                    for i in range(3): data['bme'][i].append(d[14+i])
+                    for i in range(3): data['ina'][i].append(d[17+i])
+                    for i in range(3): data['mpl'][i].append(d[20+i])
+                    for i in range(3): data['gps'][i].append(d[23+i])
+                    # Statuses: Indices 26-32
+                    for i in range(7): data['statuses'][i].append(d[26+i])
 
                 except struct.error:
                     continue
@@ -156,7 +141,7 @@ if __name__ == "__main__":
         # 1. Temperatures (5 System + 1 BME)
         # Note: BME Temp is index 2 in your parsing logic
         all_temps = mission_data['temps'] + [mission_data['bme'][0]]
-        temp_labels = [f'T{i+1}' for i in range(5)] + ['BME Temp']
+        temp_labels = [f'T{i+1}' for i in range(4)] + ['BME Temp']
         temp_colors = ['#ff9999', '#ff4d4d', '#cc0000', '#800000', '#4d0000', '#0000ff']
         create_window(f"Temperatures {mode}", time_data, all_temps, temp_labels, "°C", color_map=temp_colors)
 
@@ -185,8 +170,19 @@ if __name__ == "__main__":
         
         # 9. Bus Voltage (Calculated from 12V rail - Shunt Voltage)
         # Assuming d[18] (ina[0]) is Shunt Voltage in mV
-        V_bus = [(12000 - v)/1000.0 for v in mission_data['ina'][2]]
-        create_window(f"Estimated Bus Voltage {mode}", time_data, [V_bus], ["Voltage"], "V")
+        V = [(12000 - v) / 1000.0 for v in mission_data['ina'][2]]
+        create_window(f"Bus Voltage {mode}", time_data, [V], ["Voltage"], "V")
+
+        # GPS
+        create_window(f"GPS Latitude {mode}", time_data, [mission_data['gps'][0]], ["Latitude"], "Degrees")
+        create_window(f"GPS Longitude {mode}", time_data, [mission_data['gps'][1]], ["Longitude"], "Degrees")
+        create_window(f"GPS Altitude {mode}", time_data, [mission_data['gps'][2]], ["Altitude"], "m")
+
+        # mpl
+        create_window(f"MPL Pressure {mode}", time_data, [mission_data['mpl'][0]], ["Pressure"], "hPa")
+
+        # statuses
+        create_window(f"Subsystem Statuses {mode}", time_data, mission_data['statuses'], ['BME280', 'INA219', 'IMU', 'Temp', 'MPL', 'GPS', 'RTC'], "Status (0=Fail, 1=OK)") 
 
         plt.show()
     else:
