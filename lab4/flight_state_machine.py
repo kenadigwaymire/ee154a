@@ -218,6 +218,7 @@ class FlightStateMachine:
         if self.rtc:
             try:
                 t = self.rtc.read_data()
+                print(f"RTC read time: {t}")
                 if is_failed(t):
                     rtc_status = 0
                 else:
@@ -235,6 +236,7 @@ class FlightStateMachine:
         if self.imu:
             try:
                 accel, gyro, mag = self.imu.get_data()
+                print(f"IMU read accel: {accel}, gyro: {gyro}, mag: {mag}")
                 # If any part of the IMU read is NaN, mark as FAIL
                 if is_failed(accel) or is_failed(gyro) or is_failed(mag):
                     imu_status = 0
@@ -253,6 +255,7 @@ class FlightStateMachine:
         if self.temp:
             try:
                 t_data = self.temp.get_all_temps()
+                print(f"Temp sensor read: {t_data}")
                 temp_status = 0 if is_failed(t_data) else 1
             except Exception as e:
                 t_data = quad_nan
@@ -266,6 +269,7 @@ class FlightStateMachine:
         if self.bme280:
             try:
                 bme_data = self.bme280.get_data()
+                print(f"BME280 read: {bme_data}")
                 bme280_status = 0 if is_failed(bme_data) else 1
             except Exception as e:
                 bme_data = triple_nan
@@ -279,6 +283,7 @@ class FlightStateMachine:
         if self.ina219:
             try:
                 ina_data = self.ina219.read_data()
+                print(f"INA219 read: {ina_data}")
                 ina219_status = 0 if is_failed(ina_data) else 1
             except Exception as e:
                 ina_data = triple_nan
@@ -292,6 +297,7 @@ class FlightStateMachine:
         if self.mpl:
             try:
                 mpl_data = self.mpl.read_data()
+                print(f"MPL3115A2 read: {mpl_data}")
                 mpl_status = 0 if is_failed(mpl_data) else 1
             except Exception as e:
                 mpl_data = nan
@@ -305,6 +311,7 @@ class FlightStateMachine:
         if self.gps:
             try:
                 gps_data = self.gps.read_data()
+                print(f"GPS read: {gps_data}")
                 gps_status = 0 if is_failed(gps_data) else 1
             except Exception as e:
                 gps_data = triple_nan
