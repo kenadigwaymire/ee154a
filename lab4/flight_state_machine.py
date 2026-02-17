@@ -385,7 +385,8 @@ class FlightStateMachine:
         try:
             if self.led: self.led.on()
             while True:
-                self.handle_time_sync()
+                self.curr_time = time.time()
+                # self.handle_time_sync()
 
                 # Define loop time to ensure measurement at specified Hz
                 elapsed = self.curr_time - self.loop_start
