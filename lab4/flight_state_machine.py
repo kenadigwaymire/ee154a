@@ -389,16 +389,16 @@ class FlightStateMachine:
                 # self.handle_time_sync()
 
                 # Define loop time to ensure measurement at specified Hz
-                elapsed = self.curr_time - self.loop_start
-                wait_time = (1.0 / self.sample_rate) - elapsed
-                if wait_time > 0: 
-                    time.sleep(0.1)
-                    continue
+                # elapsed = self.curr_time - self.loop_start
+                # wait_time = (1.0 / self.sample_rate) - elapsed
+                # if wait_time > 0: 
+                #     time.sleep(0.1)
+                #     continue
 
-                # Gather data at specified Hz
-                else:
-                    self.handle_data_collection()
-
+                # # Gather data at specified Hz
+                # else:
+                #     self.handle_data_collection()
+                self.handle_data_collection()
                 self.handle_reinitialization()
 
                 # Camera Logic (pass if not connecyed)
@@ -407,7 +407,6 @@ class FlightStateMachine:
                 if not self.camera_connected: 
                     continue
             
-
                 # CHOOSE ONLY ONE OF THESE AND CHANGE MODE IN INIT
                 # self.handle_photos()
                 self.handle_video_recording()  
