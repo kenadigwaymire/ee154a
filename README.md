@@ -53,11 +53,13 @@ The production code that actually flies. Builds on Lab 3 with additional hardwar
 
 **New features over Lab 3:**
 - Every sensor initializes independently; if one fails the mission continues with NaN placeholders
-- Status flags (OK/FAIL) are packed into every CCSDS packet for each sensor
-- LED indicator on GPIO 26 signals that the flight computer is alive
-- Video recording mode (10-second clips, H.264, 480p @ 60fps) in addition to still capture
+- Every so often the script reinitializes any failed sensors to try and get them back up and running
+- Status flags (OK/FAIL) are packed into every CCSDS packet for each sensor to check if we can read the data or not
+- LED indicator on GPIO 26 signals that the flight computer is alive (necessary for background functionality)
+- Video recording mode (Currently 5-second clips, H.264, 480p @ 30fps) in addition to still capture
+  - We can only choose still or video mode since initicalizing the camera takes quite a while relative to the data capture. Thus, we are only using video for now 
 - RTC syncs the Pi system clock on each loop iteration to maintain accurate time without network
-- Watchdog-style systemd service auto-restarts the script on crash
+- Watchdog-style systemd service auto-restarts the script on crash after 5 seconds or after the Pi's bootup sequence
 
 **Data format:** Each CCSDS packet contains a 6-byte header followed by a binary payload:
 ```
@@ -121,19 +123,19 @@ mission-stop        # Stop temporarily
 mission-log         # View live script output
 mission-enable      # Enable auto-start on boot
 mission-disable     # Disable auto-start
+feed-start          # Open terminal_debugger.py
 ```
 
 **Manual operation (requires venv):**
 ```
+# How to activate VENV
 cd ee154
 source .venv/bin/activate
-cd lab4
-python flight_state_machine.py     # Run the mission loop directly
-python terminal_debugger.py        # Live telemetry display
-```
 
-**Post-flight analysis:**
-```
+# How to run code (make sure you are in lab4 folder so data paths properly)
+cd lab4
+python flight_state_machine.py                                          # Run the mission loop directly
+python terminal_debugger.py                                             # Live telemetry display
 python plot.py                                                          # Plot all data
 python plot.py --minDate="02/14/2026|12:00:00" --maxDate="02/14/2026|23:59:59"  # Filter by time
 python ccsds_to_csv.py                                                  # Export all to CSV
