@@ -313,12 +313,11 @@ class FlightStateMachine:
                 gps_data = self.gps.read_data()
                 lat, lon, alt = gps_data
                 if any(not math.isnan(val) for val in [lat, lon, alt]): # Check if any value is valid
-                    self.gps_locked_on = True
+                    gps_status = 1
                 else:
-                    self.gps_locked_on = False
                     gps_data = triple_nan
+                    gps_status = 0
                 # print(f"GPS read: {gps_data}")
-                gps_status = 0 if is_failed(gps_data) else 1
             except Exception as e:
                 gps_data = triple_nan
                 gps_status = 0
