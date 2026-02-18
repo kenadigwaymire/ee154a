@@ -74,7 +74,7 @@ def read_mission_data_filtered(folder_path, min_ts=None, max_ts=None):
                     for i in range(3): data['mag'][i].append(d[11+i])
                     for i in range(3): data['bme'][i].append(d[14+i])
                     for i in range(3): data['ina'][i].append(d[17+i])
-                    for i in range(3): data['mpl'][i].append(d[20+i])
+                    for i in range(1): data['mpl'][i].append(d[20+i])
                     for i in range(3): data['gps'][i].append(d[23+i])
                     # Statuses: Indices 26-32
                     for i in range(7): data['statuses'][i].append(d[26+i])
