@@ -1,3 +1,4 @@
+import sys
 import serial
 import pynmea2
 import time
@@ -53,3 +54,39 @@ class GP3906:
             print(f'GPS doing some dumb shit: {e}')
         
         return nan, nan, nan
+    
+if __name__ == "__main__":
+    gps = GP3906()
+    
+    if not gps.connected:
+        print("Exiting: Could not open serial port. Check your UART settings/Bluetooth.")
+        sys.exit(1)
+
+    print("--- Starting GPS Test ---")
+    print("Note: If the LED is blinking, we expect NaN, but we should still see raw data.")
+    print("Press Ctrl+C to stop.\n")
+
+    try:
+        while True:
+            # 1. Test the raw serial connection first
+            if gps.ser.in_waiting > 0:
+                raw_line = gps.ser.readline().decode('ascii', errors='replace').strip()
+                print(f"RAW: {raw_line}")
+                
+                # 2. Test the class logic
+                # We have to 'manually' feed logic if we want to test parsing,
+                # but let's just use your existing read_data function:
+                lat, lon, alt = gps.read_data()
+                
+                if any(not float('is_nan') for val in [lat, lon, alt]): # Check if any value is valid
+                    print(f"  --> LOCK ACQUIRED! Lat: {lat}, Lon: {lon}, Alt: {alt}")
+                else:
+                    print("  --> No lock yet (Searching for satellites...)")
+            
+            time.sleep(0.1)
+            
+    except KeyboardInterrupt:
+        print("\nTest stopped by user.")
+    finally:
+        if gps.ser:
+            gps.ser.close()

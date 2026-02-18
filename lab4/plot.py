@@ -216,7 +216,7 @@ if __name__ == "__main__":
 
         generate_html_gallery("graphs")
         
-        # plt.show()
+        plt.show()
 
         
     else:
