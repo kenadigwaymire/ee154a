@@ -179,7 +179,7 @@ if __name__ == "__main__":
         create_window(f"GPS Altitude {mode}", time_data, [mission_data['gps'][2]], ["Altitude"], "m")
 
         # mpl
-        create_window(f"MPL Pressure {mode}", time_data, [mission_data['mpl'][0]], ["Pressure"], "hPa")
+        create_window(f"MPL Pressure {mode}", time_data, [mission_data['mpl']], ["Pressure"], "hPa")
 
         # statuses
         create_window(f"Subsystem Statuses {mode}", time_data, mission_data['statuses'], ['BME280', 'INA219', 'IMU', 'Temp', 'MPL', 'GPS', 'RTC'], "Status (0=Fail, 1=OK)") 
