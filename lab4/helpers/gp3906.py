@@ -2,6 +2,7 @@ import sys
 import serial
 import pynmea2
 import time
+import math 
 
 class GP3906:
 
@@ -78,7 +79,7 @@ if __name__ == "__main__":
                 # but let's just use your existing read_data function:
                 lat, lon, alt = gps.read_data()
                 
-                if any(not float('is_nan') for val in [lat, lon, alt]): # Check if any value is valid
+                if any(not math.isnan(val) for val in [lat, lon, alt]): # Check if any value is valid
                     print(f"  --> LOCK ACQUIRED! Lat: {lat}, Lon: {lon}, Alt: {alt}")
                 else:
                     print("  --> No lock yet (Searching for satellites...)")
