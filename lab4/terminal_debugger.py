@@ -24,7 +24,7 @@ class TerminalDashboard:
                 gx, gy, gz,                      # Gyro
                 mx, my, mz,                      # Mag
                 bme_temp, bme_pres, bme_hum,     # BME280
-                ina_curr, ina_pwr, ina_volt,     # INA219
+                ina_volt, ina_curr, ina_pwr,     # INA219
                 mpl,
                 lat, long, alt,
                 stat_bme, stat_ina, stat_imu, stat_temp, stat_mpl, stat_gps, stat_rtc # BBBBB (Status Flags)
