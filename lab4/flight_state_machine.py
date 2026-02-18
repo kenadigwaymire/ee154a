@@ -317,7 +317,7 @@ class FlightStateMachine:
                 else:
                     self.gps_locked_on = False
                     gps_data = triple_nan
-                print(f"GPS read: {gps_data}")
+                # print(f"GPS read: {gps_data}")
                 gps_status = 0 if is_failed(gps_data) else 1
             except Exception as e:
                 gps_data = triple_nan
