@@ -308,18 +308,21 @@ class FlightStateMachine:
             mpl_status = 0
 
         # --- GPS ---
-        if self.gps:
-            try:
-                gps_data = self.gps.read_data()
-                print(f"GPS read: {gps_data}")
-                gps_status = 0 if is_failed(gps_data) else 1
-            except Exception as e:
-                gps_data = triple_nan
-                gps_status = 0
-                print(f'GPS read error: {e}')
-        else:
-            gps_data = triple_nan
-            gps_status = 0
+        # if self.gps:
+        #     try:
+        #         gps_data = self.gps.read_data()
+        #         print(f"GPS read: {gps_data}")
+        #         gps_status = 0 if is_failed(gps_data) else 1
+        #     except Exception as e:
+        #         gps_data = triple_nan
+        #         gps_status = 0
+        #         print(f'GPS read error: {e}')
+        # else:
+        #     gps_data = triple_nan
+        #     gps_status = 0
+
+        gps_data = triple_nan
+        gps_status = 0
 
         # Pack for CCSDS (Converts to binary fomat for efficient logging)
         # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
