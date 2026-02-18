@@ -76,7 +76,7 @@ class GroundStation:
     def __init__(self, simulate=False):
         self.data_folder = "simulated-data" if simulate else "data"
         self.reader = CCSDSReader(folder=self.data_folder)
-        self.dash = TerminalDashboard(mission_name="Fuck u")
+        self.dash = TerminalDashboard(mission_name="Payload #3")
 
     def run(self):
         print(f"Ground Station Active. Monitoring: {self.data_folder}")

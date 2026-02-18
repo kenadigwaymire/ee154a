@@ -218,7 +218,7 @@ class FlightStateMachine:
         if self.rtc:
             try:
                 t = self.rtc.read_data()
-                print(f"RTC read time: {t}")
+                # print(f"RTC read time: {t}")
                 if is_failed(t):
                     rtc_status = 0
                 else:
@@ -236,7 +236,7 @@ class FlightStateMachine:
         if self.imu:
             try:
                 accel, gyro, mag = self.imu.get_data()
-                print(f"IMU read accel: {accel}, gyro: {gyro}, mag: {mag}")
+                # print(f"IMU read accel: {accel}, gyro: {gyro}, mag: {mag}")
                 # If any part of the IMU read is NaN, mark as FAIL
                 if is_failed(accel) or is_failed(gyro) or is_failed(mag):
                     imu_status = 0
@@ -255,7 +255,7 @@ class FlightStateMachine:
         if self.temp:
             try:
                 t_data = self.temp.get_all_temps()
-                print(f"Temp sensor read: {t_data}")
+                # print(f"Temp sensor read: {t_data}")
                 temp_status = 0 if is_failed(t_data) else 1
             except Exception as e:
                 t_data = quad_nan
@@ -269,7 +269,7 @@ class FlightStateMachine:
         if self.bme280:
             try:
                 bme_data = self.bme280.get_data()
-                print(f"BME280 read: {bme_data}")
+                # print(f"BME280 read: {bme_data}")
                 bme280_status = 0 if is_failed(bme_data) else 1
             except Exception as e:
                 bme_data = triple_nan
@@ -283,7 +283,7 @@ class FlightStateMachine:
         if self.ina219:
             try:
                 ina_data = self.ina219.read_data()
-                print(f"INA219 read: {ina_data}")
+                # print(f"INA219 read: {ina_data}")
                 ina219_status = 0 if is_failed(ina_data) else 1
             except Exception as e:
                 ina_data = triple_nan
@@ -297,7 +297,7 @@ class FlightStateMachine:
         if self.mpl:
             try:
                 mpl_data = self.mpl.read_data()
-                print(f"MPL3115A2 read: {mpl_data}")
+                # print(f"MPL3115A2 read: {mpl_data}")
                 mpl_status = 0 if is_failed(mpl_data) else 1
             except Exception as e:
                 mpl_data = nan
@@ -398,15 +398,15 @@ class FlightStateMachine:
         try:
             if self.led: self.led.on()
             while True:
-                self.curr_time = time.time()
-                # self.handle_time_sync()
+                # self.curr_time = time.time()
+                self.handle_time_sync()
 
                 # Define loop time to ensure measurement at specified Hz
                 elapsed = self.curr_time - self.loop_start
                 wait_time = (1.0 / self.sample_rate) - elapsed
                 if wait_time > 0: 
                     time.sleep(0.05)
-                    print(f"Waiting {wait_time:.2f}s to maintain sample rate...")
+                    # print(f"Waiting {wait_time:.2f}s to maintain sample rate...")
                     continue
 
                 # # Gather data at specified Hz
@@ -415,19 +415,15 @@ class FlightStateMachine:
                 print(f"Collecting data at {self.curr_time:.2f} (Elapsed: {elapsed:.2f}s)")
                 self.handle_data_collection()
 
-                print(f"Data collected. RTC Status: {self.rtc_status} | IMU Status: {self.imu_status} | Temp Status: {self.temp_status} | BME280 Status: {self.bme280_status} | INA219 Status: {self.ina219_status} | MPL Status: {self.mpl_status} | GPS Status: {self.gps_status}")
                 self.handle_reinitialization()
 
                 # Camera Logic (pass if not connecyed)
-                # if not self.camera:
-                #     continue
-                # if not self.camera_connected: 
-                #     continue
-            
-                # # CHOOSE ONLY ONE OF THESE AND CHANGE MODE IN INIT
-                # # self.handle_photos()
-                # self.handle_video_recording()  
+                if self.camera:
+                    if self.camera_connected: 
+                        # self.handle_photos()
+                        self.handle_video_recording()  
 
+                time.sleep(0.01)  # Short sleep to prevent CPU hogging; adjust as needed
                 # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
 
 
