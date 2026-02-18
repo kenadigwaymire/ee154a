@@ -308,18 +308,24 @@ class FlightStateMachine:
             mpl_status = 0
 
         # --- GPS ---
-        # if self.gps:
-        #     try:
-        #         gps_data = self.gps.read_data()
-        #         print(f"GPS read: {gps_data}")
-        #         gps_status = 0 if is_failed(gps_data) else 1
-        #     except Exception as e:
-        #         gps_data = triple_nan
-        #         gps_status = 0
-        #         print(f'GPS read error: {e}')
-        # else:
-        #     gps_data = triple_nan
-        #     gps_status = 0
+        if self.gps:
+            try:
+                gps_data = self.gps.read_data()
+                lat, lon, alt = gps_data
+                if any(not math.isnan(val) for val in [lat, lon, alt]): # Check if any value is valid
+                    self.gps_locked_on = True
+                else:
+                    self.gps_locked_on = False
+                    gps_data = triple_nan
+                print(f"GPS read: {gps_data}")
+                gps_status = 0 if is_failed(gps_data) else 1
+            except Exception as e:
+                gps_data = triple_nan
+                gps_status = 0
+                print(f'GPS read error: {e}')
+        else:
+            gps_data = triple_nan
+            gps_status = 0
 
         gps_data = triple_nan
         gps_status = 0
