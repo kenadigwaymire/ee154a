@@ -348,10 +348,10 @@ class FlightStateMachine:
             )
         
         # Log the data in data folder with CCSDS format (Binary)
-        print(f"Logging data to CCSDS: {len(payload)} bytes")
+        # print(f"Logging data to CCSDS: {len(payload)} bytes")
         self.logger.write(payload)
 
-        print(f"Data collection complete. RTC Status: {rtc_status} | IMU Status: {imu_status} | Temp Status: {temp_status} | BME280 Status: {bme280_status} | INA219 Status: {ina219_status} | MPL Status: {mpl_status} | GPS Status: {gps_status}")
+        # print(f"Data collection complete. RTC Status: {rtc_status} | IMU Status: {imu_status} | Temp Status: {temp_status} | BME280 Status: {bme280_status} | INA219 Status: {ina219_status} | MPL Status: {mpl_status} | GPS Status: {gps_status}")
         self.bme280_status = bme280_status
         self.ina219_status = ina219_status
         self.imu_status = imu_status
