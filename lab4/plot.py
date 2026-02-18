@@ -135,7 +135,7 @@ if __name__ == "__main__":
         end_utc = datetime.fromtimestamp(mission_data['time'][-1])
         print(f"Plotting {len(mission_data['time'])} points.")
         
-        mode = "SIMULATION" if is_sim else "FLIGHT"
+        mode = "FLIGHT"
         time_data = mission_data['time']
 
         # 1. Temperatures (5 System + 1 BME)
