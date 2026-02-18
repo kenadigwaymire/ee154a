@@ -113,6 +113,36 @@ def create_window(title, x_timestamps, y_data_list, labels, y_label, color_map=N
     save_path = os.path.join("graphs", filename)
     plt.savefig(save_path)
     print(f"Saved: {save_path}")
+    
+def generate_html_gallery(folder="graphs"):
+    """Creates a simple index.html to view all generated plots."""
+    files = sorted(glob.glob(os.path.join(folder, "*.png")))
+    html_content = """
+    <html>
+    <head>
+        <title>Mission Data Plots</title>
+        <style>
+            body { font-family: sans-serif; background: #f0f0f0; text-align: center; }
+            .graph-container { margin: 20px auto; padding: 10px; background: white; 
+                               border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block; }
+            img { max-width: 90vw; height: auto; }
+            h1 { color: #333; }
+        </style>
+    </head>
+    <body>
+        <h1>Mission Control - Real Time Graphs</h1>
+    """
+    
+    for f in files:
+        rel_path = os.path.basename(f)
+        html_content += f'<div class="graph-container"><h3>{rel_path}</h3>'
+        html_content += f'<img src="{rel_path}"></div><br>\n'
+    
+    html_content += "</body></html>"
+    
+    with open(os.path.join(folder, "index.html"), "w") as f:
+        f.write(html_content)
+    print(f"Webpage updated: {os.path.join(folder, 'index.html')}")
 
 if __name__ == "__main__":
     target_folder = "data"
@@ -184,6 +214,10 @@ if __name__ == "__main__":
         # statuses
         create_window(f"Subsystem Statuses {mode}", time_data, mission_data['statuses'], ['BME280', 'INA219', 'IMU', 'Temp', 'MPL', 'GPS', 'RTC'], "Status (0=Fail, 1=OK)") 
 
-        plt.show()
+        generate_html_gallery("graphs")
+        
+        # plt.show()
+
+        
     else:
         print(f"No data found in {target_folder} matching those filters.")
