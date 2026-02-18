@@ -326,7 +326,7 @@ class FlightStateMachine:
 
         # Pack for CCSDS (Converts to binary fomat for efficient logging)
         # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
-        print(f"Packing data for CCSDS logging: Time={t}, Temps={t_data}, Accel={accel}, Gyro={gyro}, Mag={mag}, BME={bme_data}, INA={ina_data}, MPL={mpl_data}, GPS={gps_data}, Statuses: RTC={rtc_status}, IMU={imu_status}, Temp={temp_status}, BME280={bme280_status}, INA219={ina219_status}, MPL={mpl_status}, GPS={gps_status}")
+        # print(f"Packing data for CCSDS logging: Time={t}, Temps={t_data}, Accel={accel}, Gyro={gyro}, Mag={mag}, BME={bme_data}, INA={ina_data}, MPL={mpl_data}, GPS={gps_data}, Statuses: RTC={rtc_status}, IMU={imu_status}, Temp={temp_status}, BME280={bme280_status}, INA219={ina219_status}, MPL={mpl_status}, GPS={gps_status}")
         payload = struct.pack(
             ">Iffff fff fff fff fff fff f fff BBBBBBB", 
             int(self.curr_time), 
@@ -412,7 +412,7 @@ class FlightStateMachine:
                 # # Gather data at specified Hz
                 # else:
                 #     self.handle_data_collection()
-                print(f"Collecting data at {self.curr_time:.2f} (Elapsed: {elapsed:.2f}s)")
+                # print(f"Collecting data at {self.curr_time:.2f} (Elapsed: {elapsed:.2f}s)")
                 self.handle_data_collection()
 
                 self.handle_reinitialization()
