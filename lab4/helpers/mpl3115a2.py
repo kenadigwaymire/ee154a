@@ -1,3 +1,24 @@
+"""
+-------------------------------------------------------------------------------
+Project: Altitude Sensor Class for High-Altitude Balloon Mission
+
+File:    mpl3115a2.py
+
+Purpose: Handles reading and processing altitude data from the MPL3115A2 sensor.
+         Provides a clean interface for reading altitude in feet.
+
+Logic:   1. Initializes the MPL3115A2 sensor and sets up I2C communication.
+         2. Sets the sensor to the correct operating mode.
+         3. Reads and returns the current altitude in feet.
+
+If run as main:
+         1. Nothing yet (Could add standalone testing later)
+-------------------------------------------------------------------------------
+Author:  Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 import smbus2
 import time 
 

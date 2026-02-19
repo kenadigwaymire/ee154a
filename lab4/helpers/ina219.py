@@ -1,3 +1,23 @@
+"""
+-------------------------------------------------------------------------------
+Project: Current and Voltage Sensor Class for High-Altitude Balloon Mission
+
+File:    ina219.py
+
+Purpose: Handles reading and processing current, voltage, and power data from the INA219 sensor.
+         Provides a clean interface for reading these values in real-time.
+
+Logic:   1. Initializes the INA219 sensor and sets up I2C communication.
+         2. Reads and returns the current current, voltage, and power values.
+
+If run as main:
+         1. Nothing yet (Could add standalone testing later)
+-------------------------------------------------------------------------------
+Author:  James Scott and Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 from ina219 import INA219
 from ina219 import DeviceRangeError
 

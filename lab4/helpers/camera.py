@@ -1,3 +1,26 @@
+"""
+-------------------------------------------------------------------------------
+Project: Raspberry Pi HQCamera Class for High-Altitude Balloon Mission
+
+File:    camera.py
+
+Purpose: Handles initialization and control of the Raspberry Pi HQ Camera.
+         Provides a clean interface for taking still images and recording video.
+
+Logic:   1. Initializes the Picamera2 and sets up a folder for media storage.
+         2. Provides methods to take pictures and start/stop video recording.
+         3. Configures the camera for still or video mode with appropriate settings.
+         4. Ensures safe cleanup of camera resources on shutdown.
+
+If run as main:
+         1. Takes a few test pictures to verify functionality.
+         2. (Optional) Could add a test video recording here as well.
+-------------------------------------------------------------------------------
+Author:  James Scott and Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 import time
 import os
 from picamera2 import Picamera2

@@ -1,3 +1,24 @@
+"""
+-------------------------------------------------------------------------------
+Project: BME280 Sensor Class for High-Altitude Balloon Mission
+
+File:    bme_280.py
+
+Purpose: Handles I2C communication and data sampling for the BME280 sensor.
+         Provides altitude calculations based on pressure readings.
+
+Logic:   1. Initializes the BME280 sensor and loads calibration parameters.
+         2. Reads and returns temperature, pressure, and humidity data.
+         3. Calculates altitude in feet and meters based on pressure readings.
+
+If run as main:
+         1. Nothing yet (Could add standalone testing later)
+-------------------------------------------------------------------------------
+Author:  James Scott and Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 import smbus2
 import bme280
 import math

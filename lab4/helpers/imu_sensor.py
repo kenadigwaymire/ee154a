@@ -1,3 +1,22 @@
+"""
+-------------------------------------------------------------------------------
+Project: IMU Sensor Class for High-Altitude Balloon Mission
+
+File:    imu_sensor.py
+
+Purpose: Handles reading and processing data from the MPU9250 IMU sensor.
+         Provides a clean interface for reading accelerometer, gyroscope, and magnetometer data.
+
+Logic:   1. Initializes the MPU9250 IMU sensor and sets up I2C communication.
+         2. Reads and returns the current accelerometer, gyroscope, and magnetometer data.
+
+If run as main:
+         1. Nothing yet (Could add standalone testing later)
+-------------------------------------------------------------------------------
+Author:  James Scott and Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
 from mpu9250_jmdev.registers import *
 from mpu9250_jmdev.mpu_9250 import MPU9250
 

@@ -1,3 +1,31 @@
+"""
+-------------------------------------------------------------------------------
+Project: Thermistor Temperature Sensor Class for High-Altitude Balloon Mission
+
+File:    temp_sensors.py
+
+Purpose: Handles reading and processing temperature data from thermistor sensors.
+         Uses ADS1115 ADC and Steinhart-Hart equation for temperature conversion.
+         Provides a clean interface for reading multiple thermistor temperatures.
+
+Logic:   1. Initializes the ADS1115 ADC and sets up GPIO for sensor status 
+            indication.
+         2. Reads raw ADC values from 4 thermistor channels.
+         3. Converts raw ADC values to voltages, then to resistance, and 
+            finally to temperature in Celsius.
+         4. Handles sensor disconnection or invalid readings by returning 
+            NaN values and printing warnings.
+
+If run as main:
+         1. Initializes the TempSensor class.
+         2. Continuously reads and prints the temperatures from all 4 sensors every second.
+         3. Handles keyboard interrupt to exit gracefully.
+-------------------------------------------------------------------------------
+Author:  Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 import ADS1x15
 import RPi.GPIO as GPIO
 import math

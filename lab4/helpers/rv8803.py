@@ -1,3 +1,25 @@
+"""
+-------------------------------------------------------------------------------
+Project: Real Time Clock Class for High-Altitude Balloon Mission
+
+File:    rv8803.py
+
+Purpose: Handles reading and processing time data from the RV8803 RTC.
+         Provides a clean interface for setting and reading RTC time.
+
+Logic:   1. Initializes the RV8803 RTC and sets up I2C communication.
+         2. Sets the RTC time to the system time.
+         3. Reads and returns the current RTC time in epoch format.
+         4. Synchronizes the system clock with the RTC.
+
+If run as main:
+         1. Nothing yet (Could add standalone testing later)
+-------------------------------------------------------------------------------
+Author:  Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 import qwiic_rv8803
 import sys
 import time

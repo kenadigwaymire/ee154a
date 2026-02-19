@@ -1,20 +1,24 @@
 """
-CCSDS DATA LOGGING
---------------------------------------
-PURPOSE: 
-    This module implements the CCSDS Space Packet Protocol for an ISS payload. 
-    It is designed to ensure data integrity, autonomous recovery from power 
-    failures, and efficient transmission of data "bits" to a ground station.
+-------------------------------------------------------------------------------
+Project: CCSDS Data Logger/reader Class for High-Altitude Balloon Mission
 
-REASONING:
-    1. BINARY VS TEXT: We use binary (struct) because it is 3-10x more compact 
-       than CSV/JSON, saving critical bandwidth during ISS downlink passes.
-    2. STANDARDIZATION: Using CCSDS headers allows our data to be parsed by 
-       standard NASA/ESA ground station tools.
-    3. AUTONOMY: The 'rotation' and 'fsync' logic ensures that if the Pi 
-       reboots unexpectedly, the data remains intact and organized.
+File:    ccsds.py
+
+Purpose: Handles creation and storage of CCSDS-compliant binary packets.
+         Provides a clean interface for writing telemetry data to disk.
+
+Logic:   1. Initializes the logger with APID and storage settings.
+         2. Writes data payloads wrapped in CCSDS headers to disk.
+         3. Implements file rotation to prevent data loss from corruption.
+         4. Provides a reader class to decode stored CCSDS files.
+
+If run as main:
+         1. Nothing yet (Could add standalone testing later)
+-------------------------------------------------------------------------------
+Author:  James Scott and Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
 """
-
 import struct
 import os
 import time
@@ -22,12 +26,8 @@ import glob
 
 class CCSDSWriter:
     """
-    Handles the creation and storage of CCSDS-compliant binary packets.
-    
-    This class manages 'File Rotation' to prevent data corruption from 
-    impacting large datasets and handles low-level disk synchronization 
-    to protect against sudden power loss on the ISS. Files rotate every
-    10mb currently, but this can be adjusted as needed.
+    Handles creation and storage of CCSDS-compliant binary packets.
+    This class provides a clean interface for writing telemetry data to disk
     """
 
     def __init__(self, apid, folder="data", filename="telemetry.ccsds", max_bytes=10 * 1024 * 1024):

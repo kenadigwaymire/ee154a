@@ -1,3 +1,24 @@
+"""
+-------------------------------------------------------------------------------
+Project: LED Indicator Class for High-Altitude Balloon Mission
+
+File:    led.py
+
+Purpose: Handles GPIO control for a status LED on Pin 26.
+         Provides a clean interface for turning the LED on, off, and toggling it.
+
+Logic:   1. Initializes the GPIO chip and sets up the LED pin.
+         2. Turns the LED on or off.
+         3. Toggles the LED state.
+
+If run as main:
+         1. Nothing yet (Could add standalone testing later)
+-------------------------------------------------------------------------------
+Author:  James Scott and Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 import time
 import lgpio
 

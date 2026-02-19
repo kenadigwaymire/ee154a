@@ -1,3 +1,30 @@
+"""
+-------------------------------------------------------------------------------
+Project: Live Camera Updater for Focusing Camera Manually
+
+File:    active_camera.py
+
+Purpose: Handles live camera updates for manual focusing.
+         Provides a visual indicator of sharpness score.
+         Should be run on the Raspberry Pi with the HQ Camera connected.
+         You can open the generated 'focus.jpg' file on your computer using 
+         vscode's ssh browser or an equivalent to see the live feed and 
+         adjust the focus until the sharpness score is maximized. Alternatively,
+         you can open RealVNC to see the live feed directly on the Pi.
+
+Logic:   1. Initializes the Picamera2 and configures it for still capture.
+            2. Continuously captures frames and saves them as 'focus.jpg'.
+            3. Calculates a sharpness score using the variance of the Laplacian.
+            4. Prints the sharpness score in the terminal for real-time feedback.
+
+If run as main:
+         1. Runs the live camera updater for manual focusing.
+-------------------------------------------------------------------------------
+Author:  James Scott and Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 import time
 import os
 import cv2

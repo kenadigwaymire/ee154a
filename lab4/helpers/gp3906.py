@@ -1,3 +1,25 @@
+"""
+-------------------------------------------------------------------------------
+Project: GPS Class for High-Altitude Balloon Mission
+
+File:    gp3906.py
+
+Purpose: Handles reading and processing GPS data from a serial connection.
+         Provides a clean interface for reading latitude, longitude, and altitude.
+
+Logic:   1. Initializes the serial connection to the GPS module.
+         2. Reads and parses NMEA sentences to extract GPS data.
+         3. Handles errors gracefully and returns NaN for invalid readings.
+
+If run as main:
+         1. Continuously reads GPS data and prints it in a user-friendly format.
+         2. Handles keyboard interrupt to exit gracefully.
+-------------------------------------------------------------------------------
+Author:  James Scott and Kenadi Waymire
+Date:    February 2026
+-------------------------------------------------------------------------------
+"""
+
 import sys
 import serial
 import pynmea2
