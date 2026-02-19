@@ -112,8 +112,12 @@ See `lab4/readme.txt` for the full quick-reference. Summary:
 
 **SSH into the Pi:**
 ```
-ssh ee154@10.8.18.185
+# Ensure you are on Caltech Secure wifi and have ssh installed on your pc
+ssh ee154@10.8.48.70
 # password: raspberry23
+
+# If unable to ssh, check pi to see if power is stable or blinking on and 
+# off (might need to charge batteries)
 ```
 
 **Watchdog commands (systemd service):**
@@ -128,16 +132,36 @@ feed-start          # Open terminal_debugger.py
 
 **Manual operation (requires venv):**
 ```
-# How to activate VENV
+# How to activate VENV (Necessary for any python function in this project)
 cd ee154
 source .venv/bin/activate
+# You can pip freeze the requirements.txt file and then copy/push to an 
+# external device to easily install these packages on your pc or any other 
+# device
 
 # How to run code (make sure you are in lab4 folder so data paths properly)
 cd lab4
 python flight_state_machine.py                                          # Run the mission loop directly
 python terminal_debugger.py                                             # Live telemetry display
+
+# Plot on local machine (cant use pi since ssh doesnt have visualization natively)
+cd lab4
 python plot.py                                                          # Plot all data
 python plot.py --minDate="02/14/2026|12:00:00" --maxDate="02/14/2026|23:59:59"  # Filter by time
+
+# Plot on pi to view through web server (Run both functions simultaneously)
+cd lab4
+python3 -m http.server 8080
+python3 plot.py --web
+# OR: python3 plot.py --web --minDate="02/14/2026|12:00:00" --maxDate="02/14/2026|23:59:59"
+# Every --Addition is not necessary. Only there for making your life easier
+
+# If not running all sensors/camera or on wall power, 
+# you might have enough power to auto update plots like so:
+# in Linux/Mac Terminal (loop updates every 60 seconds)
+while true; do python3 plot.py --web; sleep 60; done
+
+# Example functions for csv conversion (Not fully tested)
 python ccsds_to_csv.py                                                  # Export all to CSV
 python ccsds_to_csv.py --minDate="02/14/2026|08:00:00"                  # Export filtered
 ```
