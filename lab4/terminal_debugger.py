@@ -52,7 +52,7 @@ class TerminalDashboard:
             
             print(f"ENVIRONMENT & POWER:")
             print(f"  BME: {bme_pres:>7.2f} hPa | {bme_hum:>5.2f}% Hum")
-            print(f"  INA: {ina_volt:>7.2f} mV  | {ina_curr:>7.2f} mA | {ina_pwr:>5.2f} W")
+            print(f"  INA: {ina_volt:>7.2f} V  | {ina_curr:>7.2f} mA | {ina_pwr:>5.2f} W")
             print(f"  MPL: {mpl:>7.2f} ft")
             print(f"  GPS: {lat:>7.2f} deg  | {long:>7.2f} deg | {alt:>5.2f} m")
             print("-" * 55)
