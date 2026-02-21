@@ -165,12 +165,6 @@ if __name__ == "__main__":
         end_utc = datetime.fromtimestamp(mission_data['time'][-1])
         print(f"Plotting {len(mission_data['time'])} points.")
         
-<<<<<<< HEAD
-        all_temps = mission_data['temps'] + [mission_data['bme'][0]]
-        temp_labels = [f'T{i+1}' for i in range(4)] + ['BME Temp']
-        temp_colors = ['#ff9999', '#ff4d4d', '#cc0000', '#800000', '#4d0000', '#0000ff']
-        create_window(f"Temperatures", time_data, all_temps, temp_labels, "°C", color_map=temp_colors)
-=======
         mode = "FLIGHT"
         time_data = mission_data['time']
 
@@ -182,47 +176,7 @@ if __name__ == "__main__":
         create_window(f"Temperatures {mode}", time_data, all_temps, temp_labels, "°C", color_map=temp_colors)
 
         # 2. Accelerometer
-        create_window(f"Accelerometer {mode}", time_data, mission_data['accel'], ['X', 'Y', 'Z'], "m/s² OR g")
-
-        # 3. Gyroscope
-        create_window(f"Gyroscope {mode}", time_data, mission_data['gyro'], ['X', 'Y', 'Z'], "rad/s")
-
-        # 4. Magnetometer
-        create_window(f"Magnetometer {mode}", time_data, mission_data['mag'], ['X', 'Y', 'Z'], "μT")
-
-        # 5. BME Pressure
-        create_window(f"BME280 Pressure {mode}", time_data, [mission_data['bme'][1]], ["Pressure"], "hPa")
-
-        # 6. BME Humidity
-        create_window(f"BME280 Humidity {mode}", time_data, [mission_data['bme'][2]], ["Humidity"], "%")
-
-        # 7. INA Current
-        A = [c / 1000.0 for c in mission_data['ina'][0]]
-        create_window(f"INA219 Current {mode}", time_data, [A], ["Current"], "A")
-
-        # 8. INA Power
-        W = [p / 1000.0 for p in mission_data['ina'][1]]
-        create_window(f"INA219 Power {mode}", time_data, [W], ["Power"], "W")
-        
-        # 9. Bus Voltage (Calculated from 12V rail - Shunt Voltage)
-        # Assuming d[18] (ina[0]) is Shunt Voltage in mV
-        V = [(12000 - v) / 1000.0 for v in mission_data['ina'][2]]
-        create_window(f"Bus Voltage {mode}", time_data, [V], ["Voltage"], "V")
-
-        # GPS
-        create_window(f"GPS Latitude {mode}", time_data, [mission_data['gps'][0]], ["Latitude"], "Degrees")
-        create_window(f"GPS Longitude {mode}", time_data, [mission_data['gps'][1]], ["Longitude"], "Degrees")
-        create_window(f"GPS Altitude {mode}", time_data, [mission_data['gps'][2]], ["Altitude"], "m")
-
-        # mpl
-        create_window(f"MPL Pressure {mode}", time_data, [mission_data['mpl']], ["Pressure"], "hPa")
-
-        # statuses
-        create_window(f"Subsystem Statuses {mode}", time_data, mission_data['statuses'], ['BME280', 'INA219', 'IMU', 'Temp', 'MPL', 'GPS', 'RTC'], "Status (0=Fail, 1=OK)") 
->>>>>>> bc0825691bc895415c220f4a276aeb299cdb286f
-
-        # 2. Accelerometer
-        create_window(f"Accelerometer", time_data, mission_data['accel'], ['X', 'Y', 'Z'], "m/s² OR g")
+        create_window(f"Accelerometer", time_data, mission_data['accel'], ['X', 'Y', 'Z'], "m/s² OR g's")
 
         # 3. Gyroscope
         create_window(f"Gyroscope", time_data, mission_data['gyro'], ['X', 'Y', 'Z'], "rad/s")
@@ -237,17 +191,17 @@ if __name__ == "__main__":
         create_window(f"BME280 Humidity", time_data, [mission_data['bme'][2]], ["Humidity"], "%")
 
         # 7. INA Current
-        A = [c / 1000.0 for c in mission_data['ina'][0]]
+        A = [c / -1000.0 for c in mission_data['ina'][1]]
         create_window(f"INA219 Current", time_data, [A], ["Current"], "A")
 
         # 8. INA Power
-        W = [p / 1000.0 for p in mission_data['ina'][1]]
+        W = [p / 1000.0 for p in mission_data['ina'][2]]
         create_window(f"INA219 Power", time_data, [W], ["Power"], "W")
         
         # 9. Bus Voltage (Calculated from 12V rail - Shunt Voltage)
         # Assuming d[18] (ina[0]) is Shunt Voltage in mV
-        V = [v / 1000.0 for v in mission_data['ina'][2]]
-        create_window(f"Bus Voltage", time_data, [V], ["Voltage"], "V")
+        V = [v for v in mission_data['ina'][0]]
+        create_window(f"INA219 Bus Voltage", time_data, [V], ["Voltage"], "V")
 
         # GPS
         create_window(f"GPS Latitude", time_data, [mission_data['gps'][0]], ["Latitude"], "Degrees")
@@ -255,10 +209,12 @@ if __name__ == "__main__":
         create_window(f"GPS Altitude", time_data, [mission_data['gps'][2]], ["Altitude"], "m")
 
         # mpl
-        create_window(f"MPL Pressure", time_data, [mission_data['mpl']], ["Pressure"], "hPa")
+        M = [m / 3.28084 for m in mission_data['mpl']]
+        create_window(f"MPL Altitude", time_data, [M], ["Altitude"], "m")
 
         # statuses
         create_window(f"Subsystem Statuses", time_data, mission_data['statuses'], ['BME280', 'INA219', 'IMU', 'Temp', 'MPL', 'GPS', 'RTC'], "Status (0=Fail, 1=OK)") 
+        
         generate_html_gallery("graphs")
         
         plt.show()

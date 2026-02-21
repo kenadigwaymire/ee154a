@@ -50,6 +50,11 @@ class TerminalDashboard:
                 stat_bme, stat_ina, stat_imu, stat_temp, stat_mpl, stat_gps, stat_rtc # BBBBB (Status Flags)
             ) = data_packet
 
+            # fix data values
+            ina_curr /= -1e3
+            ina_pwr /= 1e3
+            mpl /= 3.28084
+
             self.clear_screen()
             uptime = time.time() - self.start_time
 
@@ -60,21 +65,21 @@ class TerminalDashboard:
             print("-" * 55)
             
             print(f"TEMPERATURES (°C):")
-            print(f"  T1:{t1:>5.1f} T2:{t2:>5.1f} T3:{t3:>5.1f} T4:{t4:>5.1f}")
+            print(f"  T1:{t1:>5.1f}  | T2:{t2:>5.1f}  | T3:{t3:>5.1f}  | T4:{t4:>5.1f}")
             print(f"  BME Temp: {bme_temp:.2f}°C")
             print("-" * 55)
             
             print(f"IMU DATA:")
-            print(f"  ACCEL (m/s²):  X:{ax:>6.2f}  Y:{ay:>6.2f}  Z:{az:>6.2f}")
+            print(f"  ACCEL (g):  X:{ax:>6.2f}  Y:{ay:>6.2f}  Z:{az:>6.2f}")
             print(f"  GYRO  (rad/s): X:{gx:>6.2f}  Y:{gy:>6.2f}  Z:{gz:>6.2f}")
             print(f"  MAG   (μT):    X:{mx:>6.2f}  Y:{my:>6.2f}  Z:{mz:>6.2f}")
             print("-" * 55)
             
             print(f"ENVIRONMENT & POWER:")
             print(f"  BME: {bme_pres:>7.2f} hPa | {bme_hum:>5.2f}% Hum")
-            print(f"  INA: {ina_volt:>7.2f} V  | {ina_curr:>7.2f} mA | {ina_pwr:>5.2f} W")
-            print(f"  MPL: {mpl:>7.2f} ft")
-            print(f"  GPS: {lat:>7.2f} deg  | {long:>7.2f} deg | {alt:>5.2f} m")
+            print(f"  INA: {ina_volt:>7.2f} V   | {ina_curr:>7.2f} A | {ina_pwr:>5.2f} W")
+            print(f"  GPS: {lat:>7.2f} deg      | {long:>7.2f} deg   | {alt:>5.2f} m")
+            print(f"  MPL: {mpl:>7.2f} m")
             print("-" * 55)
             
             # Helper to colorize status

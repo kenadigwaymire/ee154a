@@ -152,14 +152,16 @@ python plot.py --minDate="02/14/2026|12:00:00" --maxDate="02/14/2026|23:59:59"  
 # Plot on pi to view through web server (Run both functions simultaneously)
 cd lab4
 python3 -m http.server 8080
-python3 plot.py --web
-# OR: python3 plot.py --web --minDate="02/14/2026|12:00:00" --maxDate="02/14/2026|23:59:59"
+python3 plot.py
+# OR: python3 plot.py --minDate="02/14/2026|12:00:00" --maxDate="02/14/2026|23:59:59"
 # Every --Addition is not necessary. Only there for making your life easier
+# If python3 doesnt work try python
+# Updated this script to work regardless of web or local mode
 
 # If not running all sensors/camera or on wall power, 
 # you might have enough power to auto update plots like so:
 # in Linux/Mac Terminal (loop updates every 60 seconds)
-while true; do python3 plot.py --web; sleep 60; done
+while true; do python3 plot.py; sleep 60; done
 
 # Example functions for csv conversion (Not fully tested)
 python ccsds_to_csv.py                                                  # Export all to CSV
