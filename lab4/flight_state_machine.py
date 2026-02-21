@@ -624,6 +624,25 @@ class FlightStateMachine:
                 except Exception as e:
                     print(f"Failed to stop video: {e}")
 
+    def handle_led_toggle(self):
+        """
+        Handles LED toggling for visual status indication. If the LED is connected, 
+        it toggles the LED state at defined intervals to provide a visual heartbeat 
+        of the mission's operation. This can be useful for quick visual checks of the 
+        system status during flight.
+        
+        Raises:
+            Exception: If there is an error toggling the LED, an error message is printed, 
+            but the mission continues.
+        """
+        if self.led:
+            try:
+                if self.curr_time - self.last_led_flash >= self.led_flash_dur:
+                    self.led.toggle()
+                    self.last_led_flash = self.curr_time
+            except Exception as e:
+                print(f"Error toggling LED: {e}")
+
     def run(self):
         """
         The main mission loop.
@@ -636,8 +655,6 @@ class FlightStateMachine:
         print(f"Mission Started. Rate: {self.sample_rate}Hz")
 
         try:
-            if self.led:
-                self.led.toggle()
             while True:
                 # self.curr_time = time.time()
                 self.handle_time_sync()
@@ -646,29 +663,28 @@ class FlightStateMachine:
                 elapsed = self.curr_time - self.loop_start
                 wait_time = (1.0 / self.sample_rate) - elapsed
                 if wait_time > 0:
-                    time.sleep(0.05)
                     # print(f"Waiting {wait_time:.2f}s to maintain sample rate...")
-                    continue
+                    time.sleep(0.01)
 
                 # Gather data at specified Hz
                 else:
+                    self.handle_led_toggle()
                     self.handle_data_collection()
                     # print(f"Collecting data at {self.curr_time:.2f} (Elapsed: {elapsed:.2f}s)")
+                    self.handle_reinitialization()
 
-                self.handle_reinitialization()
+                    # Camera Logic (pass if not connecyed)
+                    if self.camera:
+                        if self.camera_connected:
+                            if self.camera_mode == "still":
+                                self.handle_photos()
+                            else:
+                                self.handle_video_recording()
 
-                # Camera Logic (pass if not connecyed)
-                if self.camera:
-                    if self.camera_connected:
-                        if self.camera_mode == "still":
-                            self.handle_photos()
-                        else:
-                            self.handle_video_recording()
-
-                time.sleep(
-                    0.01
-                )  # Short sleep to prevent CPU hogging; adjust as needed
-                # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
+                    time.sleep(
+                        0.01
+                    )  # Short sleep to prevent CPU hogging; adjust as needed
+                    # break  # Uncomment this to only test one loop iteration; it's here just for testing purposes.
 
         # Handle graceful exit
         except KeyboardInterrupt:
