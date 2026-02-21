@@ -637,7 +637,7 @@ class FlightStateMachine:
 
         try:
             if self.led:
-                self.led.on()
+                self.led.toggle()
             while True:
                 # self.curr_time = time.time()
                 self.handle_time_sync()
