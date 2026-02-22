@@ -74,7 +74,7 @@ class TempSensor:
             # Read raw ADC and convert to Voltage -> Resistance -> Temp
             raw_vals = [self.ads1.readADC(0), self.ads1.readADC(1), 
                         self.ads1.readADC(2), self.ads1.readADC(3)]
-            print(f"Raw ADC values: {raw_vals}")
+            # print(f"Raw ADC values: {raw_vals}")
             
             # for each sensor, check if voltage is too low to be a real reading; 
             # if so, print warning and return NaN for that sensor. 

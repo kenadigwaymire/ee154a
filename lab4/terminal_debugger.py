@@ -116,7 +116,7 @@ class GroundStation:
                     time.sleep(1)
                     continue
 
-                latest_file = files[-1] # Grab the newest file
+                latest_file = "telemetry.ccsds" # Grab the newest file
                 
                 # 2. Open the file and jump to the end
                 with open(latest_file, "rb") as f:
