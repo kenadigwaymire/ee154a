@@ -38,6 +38,7 @@ class TempSensor:
         try:
             self.ads1 = ADS1x15.ADS1115(1, 0x48)
             self.gpio_pin = gpio_pin
+            self.ads1.setGain(1)
             
             # Steinhart-Hart Coefficients
             self.A, self.B, self.C, self.D = 1.0219e-3, 2.4145e-4, -2.4762e-7, 1.6539e-7
