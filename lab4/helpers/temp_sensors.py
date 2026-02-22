@@ -41,7 +41,7 @@ class TempSensor:
             
             # Steinhart-Hart Coefficients
             self.A, self.B, self.C, self.D = 1.0219e-3, 2.4145e-4, -2.4762e-7, 1.6539e-7
-            self.R_VAL, self.VCC = 510000, 3.3
+            self.R_VAL, self.VCC = 51000, 3.3
 
             GPIO.setmode(GPIO.BCM)
             GPIO.setup(self.gpio_pin, GPIO.OUT)
