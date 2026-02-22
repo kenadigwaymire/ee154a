@@ -171,7 +171,7 @@ if __name__ == "__main__":
         # 1. Temperatures (5 System + 1 BME)
         # Note: BME Temp is index 2 in your parsing logic
         all_temps = mission_data['temps'] + [mission_data['bme'][0]]
-        temp_labels = [f'T{i+1}' for i in range(4)] + ['BME Temp']
+        temp_labels = ["T-EXT-BACK", "T-EXT-FRONT", "T-BATTERY", "T-CPU", "T-INTERNAL/BME"]
         temp_colors = ['#ff9999', '#ff4d4d', '#cc0000', '#800000', '#4d0000', '#0000ff']
         create_window(f"Temperatures {mode}", time_data, all_temps, temp_labels, "°C", color_map=temp_colors)
 
