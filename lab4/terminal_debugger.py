@@ -65,8 +65,8 @@ class TerminalDashboard:
             print("-" * 55)
             
             print(f"TEMPERATURES (°C):")
-            print(f"  T1:{t1:>5.1f}  | T2:{t2:>5.1f}  | T3:{t3:>5.1f}  | T4:{t4:>5.1f}")
-            print(f"  BME Temp: {bme_temp:.2f}°C")
+            print(f"  T-EXT-BACK:{t1:>5.1f}  | T-EXT-FRONT:{t2:>5.1f}  | T-BATTERY:{t3:>5.1f}  | T-CPU:{t4:>5.1f}")
+            print(f"  BME/Internal Temp: {bme_temp:.2f}°C")
             print("-" * 55)
             
             print(f"IMU DATA:")
