@@ -108,16 +108,11 @@ class GroundStation:
         
         try:
             while True:
-                # 1. Always look for the LATEST file (sorted by name/time)
-                files = sorted(glob.glob(os.path.join(self.data_folder, "*.ccsds")))
-                
-                if not files:
+                latest_file = os.path.join(self.data_folder, "telemetry.ccsds")
+                if not latest_file or not os.path.exists(latest_file):
                     print("NO DATA DETECTED - Waiting...")
                     time.sleep(1)
                     continue
-
-                latest_file = "telemetry.ccsds" # Grab the newest file
-                
                 # 2. Open the file and jump to the end
                 with open(latest_file, "rb") as f:
                     file_size = os.path.getsize(latest_file)
