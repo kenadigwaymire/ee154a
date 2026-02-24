@@ -66,11 +66,13 @@ class HQCameraRecorder:
             # Force the frame rate in the configuration controls
             config = self.picam2.create_video_configuration(
                 main={"size": (640, 480)},
-                controls={"FrameRate": fps} 
+                controls={"FrameRate": fps,
+                          "AwbMode": 5}        
             )
             print(f"Camera configured for 480p Video at {fps} FPS.")
         else:
-            config = self.picam2.create_still_configuration(main={"size": (640, 480)})
+            config = self.picam2.create_still_configuration(main={"size": (640, 480)},
+                                                            controls={"AwbMode": 5})
             print("Camera configured for High-Res Still.")
             
         self.picam2.configure(config)
