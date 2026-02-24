@@ -91,21 +91,19 @@ if __name__ == "__main__":
 
     try:
         while True:
-            # 1. Test the raw serial connection first
-            if gps.ser.in_waiting > 0:
-                raw_line = gps.ser.readline().decode('ascii', errors='replace').strip()
-                print(f"RAW: {raw_line}")
-                
-                # 2. Test the class logic
-                # We have to 'manually' feed logic if we want to test parsing,
-                # but let's just use your existing read_data function:
-                lat, lon, alt = gps.read_data()
-                
-                if any(not math.isnan(val) for val in [lat, lon, alt]): # Check if any value is valid
-                    print(f"  --> LOCK ACQUIRED! Lat: {lat}, Lon: {lon}, Alt: {alt}")
-                else:
-                    print("  --> No lock yet (Searching for satellites...)")
+            # Let the class do the reading and parsing in one go
+            lat, lon, alt = gps.read_data()
             
+            # If you still want to see raw data for debugging, 
+            # you should print it INSIDE read_data() or return it.
+            # For now, let's just check the result:
+            
+            if not math.isnan(lat): 
+                print(f"LOCK ACQUIRED! Lat: {lat}, Lon: {lon}, Alt: {alt}")
+            else:
+                print("Searching for satellites... (No lock yet)")
+            
+            # Reduced sleep so we don't fall behind the serial buffer
             time.sleep(0.1)
             
     except KeyboardInterrupt:
