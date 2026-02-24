@@ -47,34 +47,26 @@ class GP3906:
             print(f'Failed to connect to GP3906: {e}')
             self.connected = False
             self.ser = None
-
     def read_data(self):
         nan = float('nan')
-
-        if not self.ser:
+        if not self.ser or self.ser.in_waiting == 0:
             return nan, nan, nan
         
         try:
-            line = self.ser.readline().decode('ascii', errors='replace').strip()
-            # with altitude
-            if line.startswith('$GPGGA'):
-                msg = pynmea2.parse(line)
-
-                if msg.gps_qual > 0:
-                    latitude = msg.latitude
-                    longitude = msg.longitude
-                    altitude = msg.altitude
-                    return latitude, longitude, altitude
+            # Check if there is a decent amount of data before trying to read
+            if self.ser.in_waiting > 50: 
+                line = self.ser.readline().decode('ascii', errors='replace').strip()
                 
-            # without altitude
-            elif line.startswith('$GPRMC'):
-                msg = pynmea2.parse(line)
-
-                if msg.status == 'A':
-                    latitude = msg.latitude
-                    longitude = msg.longitude
-                    altitude = nan
-                    return latitude, longitude, altitude
+                # Check for the specific sentences your mission needs
+                if line.startswith('$GPGGA'):
+                    msg = pynmea2.parse(line)
+                    if msg.gps_qual > 0:
+                        return msg.latitude, msg.longitude, msg.altitude
+                
+                elif line.startswith('$GPRMC'):
+                    msg = pynmea2.parse(line)
+                    if msg.status == 'A':
+                        return msg.latitude, msg.longitude, nan
         
         except pynmea2.ParseError:
             pass # ignore fucked up lines
