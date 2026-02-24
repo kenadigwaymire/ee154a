@@ -33,6 +33,12 @@ class GP3906:
     TIMEOUT = 0.5
 
     def __init__(self):
+        # Force GPIO 15 to Alt0 (Serial RX) system-wide
+        import subprocess
+        try:
+            subprocess.run(["sudo", "pinctrl", "set", "15", "a0"], check=True)
+        except Exception:
+            print("Warning: Failed to set GPIO 15 to Alt0. Check your pin configuration and permissions.") 
         try:
             self.ser = serial.Serial(self.PORT, baudrate=self.BAUD_RATE, timeout=self.TIMEOUT)
             print(f'GP3906 intialized on port {self.PORT}')
