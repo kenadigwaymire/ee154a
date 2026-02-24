@@ -527,9 +527,6 @@ class FlightStateMachine:
             gps_data = triple_nan
             gps_status = 0
 
-        gps_data = triple_nan
-        gps_status = 0
-
         # Pack for CCSDS (Converts to binary fomat for efficient logging)
         # I = unsigned int (4 bytes), f = float (4 bytes), B = unsigned char (1 byte)
         # print(f"Packing data for CCSDS logging: Time={t}, Temps={t_data}, Accel={accel}, Gyro={gyro}, Mag={mag}, BME={bme_data}, INA={ina_data}, MPL={mpl_data}, GPS={gps_data}, Statuses: RTC={rtc_status}, IMU={imu_status}, Temp={temp_status}, BME280={bme280_status}, INA219={ina219_status}, MPL={mpl_status}, GPS={gps_status}")
