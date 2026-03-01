@@ -166,9 +166,34 @@ while true; do python3 plot.py; sleep 60; done
 # Example functions for csv conversion (Not fully tested)
 python ccsds_to_csv.py                                                  # Export all to CSV
 python ccsds_to_csv.py --minDate="02/14/2026|08:00:00"                  # Export filtered
+
+# Debugging PINCRTL (sometimes our boot config doesnt kick in to set gpio pin to rx mode)
+sudo pinctrl set 15 a0 # Run this when GPS reads nothing (Should print lines even if no gps lock)
+pinctrl get 15 # To check (Should read RX)
 ```
 
 ---
+
+
+## Weather Balloon Launch Toland Park, CA (2/28/26 @ 10am)
+
+**CSV Flight Data (Only available to Caltech emails):**
+* [CSV Flight Data](https://caltech.box.com/s/2vffhvy48c4ca120hryfinjjts6m6xgd) (Caltech emails only)
+All binary data is stored on github for anyone in lab4 to access under the data folder. the csv file is too large to publish outside of box, but can be converted using ccsds2csv file on a local machine
+
+**HQCam Raw Flight Feed (Upside down and gain incorrect, but will post-process later):**
+* [HQCam Raw Flight Feed](https://youtu.be/WnrOzaf5HY8)
+
+**Successes:**
+* Launched and landed succesfully (Only lost one payload due to either burst opf ballon or high wind)
+* Our payload lasted several hours longer than our conservative estimates thanks to the binary data over csv and the state machine which runs as little power as possible
+* Data safe and undergoing review
+
+**Issues:**
+* Some problems with pinctrl boot configs not kicking in properly, so we had to manually configure the pins before launch
+* Real time clock got out of sync. Maybe we accidentlally reset it on the drive over (reset button is easy to accidentally press)
+* Some graphs seem to be reading incorrect or have wrong units (will need to check conversions and units are correct)
+
 
 ## Misc Folder
 
