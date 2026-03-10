@@ -5,6 +5,7 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime
+import math
 
 # 1. Configuration
 # ts, 5 temps, 3 accel, 3 gyro, 3 mag, 3 bme, 3 ina, is_utc, bme280_status, ina219_status, imu_status, temp_status
@@ -236,10 +237,32 @@ if __name__ == "__main__":
         create_window(f"GPS Latitude", time_data, [mission_data['gps'][0]], ["Latitude"], "Degrees")
         create_window(f"GPS Longitude", time_data, [mission_data['gps'][1]], ["Longitude"], "Degrees")
         
-        # Overlaying GPS (index 2 of gps data) and MPL altitude
-        M = [m/3.281 for m in mission_data['mpl']]  # Convert feet to meters if needed
-        alt_data = [mission_data['gps'][2], M]
-        alt_labels = ["GPS Altitude", "MPL Altitude"]
+        # Overlaying GPS (index 2 of gps data) and MPL altitude'
+        def hpa_to_altitude(pressure_hpa):
+            # Constants for the Standard Atmosphere
+            P0 = 1013.25 # Sea level pressure in hPa
+            
+            # If pressure is very low (Stratosphere), we use a different calculation
+            # 226.32 hPa is the approximate pressure at the Tropopause (11km)
+            if pressure_hpa > 226.32:
+                # Troposphere Math
+                altitude = 44330.77 * (1.0 - (pressure_hpa / P0)**0.190263)
+            else:
+                # Stratosphere Math (11km to 20km+)
+                # This accounts for the isothermal layer where temp is constant (-56.5C)
+                h_tropo = 11000  # Tropopause height in meters
+                p_tropo = 226.32 # Pressure at tropopause
+                T_tropo = 216.65 # Temp in Kelvin (-56.5C)
+                R = 287.058      # Gas constant
+                g = 9.80665      # Gravity
+                
+                altitude = h_tropo - (R * T_tropo / g) * math.log(pressure_hpa / p_tropo)
+
+            return altitude
+        B = [hpa_to_altitude(p) for p in mission_data['bme'][1]]
+        M = [m/3.28084 for m in mission_data["mpl"]]  
+        alt_data = [mission_data['gps'][2], M, B]
+        alt_labels = ["GPS Altitude", "MPL Altitude", "BME280 Altitude"]
         create_window("Altitude Overlay", time_data, alt_data, alt_labels, "Altitude (m)")
 
         # statuses
