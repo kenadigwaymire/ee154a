@@ -144,6 +144,31 @@ def generate_html_gallery(folder="graphs"):
         f.write(html_content)
     print(f"Webpage updated: {os.path.join(folder, 'index.html')}")
 
+def plot_multi_temp_profile(pressure_hpa, temp_list, labels, title="Atmospheric Temperature Profile"):
+    """Plots Temperature (Y) vs Pressure (X) for multiple sensors."""
+    plt.figure(num=title, figsize=(10, 7))
+    
+    # Standard colors for your sensors
+    colors = ['#ff9999', '#ff4d4d', '#cc0000', '#800000', '#0000ff']
+    
+    for i, temp_data in enumerate(temp_list):
+        plt.scatter(pressure_hpa, temp_data, label=labels[i], s=2, alpha=0.6, color=colors[i] if i < len(colors) else None)
+    
+    plt.title(title)
+    plt.xlabel("Pressure (hPa)")
+    plt.ylabel("Temperature (°C)")
+    
+    # Pressure usually drops from left to right in atmospheric plots
+    # plt.gca().invert_xaxis() 
+    
+    plt.legend(loc='best', markerscale=5)
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.tight_layout()
+
+    filename = title.replace(" ", "_") + ".png"
+    plt.savefig(os.path.join("graphs", filename))
+    print(f"Saved: graphs/{filename}")
+
 if __name__ == "__main__":
     target_folder = "data"
     
@@ -175,11 +200,15 @@ if __name__ == "__main__":
         temp_colors = ['#ff9999', '#ff4d4d', '#cc0000', '#800000', '#4d0000', '#0000ff']
         create_window(f"Temperatures {mode}", time_data, all_temps, temp_labels, "°C", color_map=temp_colors)
 
+        # Temp versus Pressure Overlay
+        pressure_data = [mission_data['bme'][1]]  # BME Pressure
+        plot_multi_temp_profile(pressure_data, all_temps, temp_labels, "Temperature vs Pressure Profile")
+
         # 2. Accelerometer
         create_window(f"Accelerometer", time_data, mission_data['accel'], ['X', 'Y', 'Z'], "m/s² OR g's")
 
         # 3. Gyroscope
-        create_window(f"Gyroscope", time_data, mission_data['gyro'], ['X', 'Y', 'Z'], "rad/s")
+        create_window(f"Gyroscope", time_data, mission_data['gyro'], ['X', 'Y', 'Z'], "deg/s")
 
         # 4. Magnetometer
         create_window(f"Magnetometer", time_data, mission_data['mag'], ['X', 'Y', 'Z'], "μT")
@@ -200,17 +229,18 @@ if __name__ == "__main__":
         
         # 9. Bus Voltage (Calculated from 12V rail - Shunt Voltage)
         # Assuming d[18] (ina[0]) is Shunt Voltage in mV
-        V = [v for v in mission_data['ina'][0]]
+        V = mission_data['ina'][0]
         create_window(f"INA219 Bus Voltage", time_data, [V], ["Voltage"], "V")
 
         # GPS
         create_window(f"GPS Latitude", time_data, [mission_data['gps'][0]], ["Latitude"], "Degrees")
         create_window(f"GPS Longitude", time_data, [mission_data['gps'][1]], ["Longitude"], "Degrees")
-        create_window(f"GPS Altitude", time_data, [mission_data['gps'][2]], ["Altitude"], "m")
-
-        # mpl
-        M = [m / 3.28084 for m in mission_data['mpl']]
-        create_window(f"MPL Altitude", time_data, [M], ["Altitude"], "m")
+        
+        # Overlaying GPS (index 2 of gps data) and MPL altitude
+        M = [m/3.281 for m in mission_data['mpl']]  # Convert feet to meters if needed
+        alt_data = [mission_data['gps'][2], M]
+        alt_labels = ["GPS Altitude", "MPL Altitude"]
+        create_window("Altitude Overlay", time_data, alt_data, alt_labels, "Altitude (m)")
 
         # statuses
         create_window(f"Subsystem Statuses", time_data, mission_data['statuses'], ['BME280', 'INA219', 'IMU', 'Temp', 'MPL', 'GPS', 'RTC'], "Status (0=Fail, 1=OK)") 
